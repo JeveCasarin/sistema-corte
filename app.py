@@ -185,8 +185,6 @@ if st.button("Buscar"):
 # ================= ALERTA DE COMPRA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
-CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
-
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
@@ -217,33 +215,30 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         st.dataframe(alerta.style.apply(cor_linha, axis=1))
 
-        alerta.to_excel(CAMINHO_ALERTA, index=False)
+        # 🔥 BOTÕES POR ITEM
+        st.markdown("### ✔️ Marcar como comprado")
 
-        # 🔥 MARCAR COMO COMPRADO
-        st.markdown("### ✅ Marcar como comprado")
+        for i, row in alerta.iterrows():
+            col1, col2, col3, col4, col5 = st.columns([2,2,2,2,1])
 
-        ref_compra = st.text_input("Referência", key="compra_ref")
-        cod_compra = st.text_input("Código da Cor", key="compra_cod")
+            col1.write(row["Referencia"])
+            col2.write(row["CodCor"])
+            col3.write(row["Cor"])
+            col4.write(row["Quantidade"])
 
-        if st.button("Confirmar Compra"):
-            df = pd.read_excel(CAMINHO_ESTOQUE)
+            if col5.button("OK", key=f"btn_{i}"):
+                df = pd.read_excel(CAMINHO_ESTOQUE)
 
-            df["Referencia"] = df["Referencia"].astype(str).str.strip()
-            df["CodCor"] = df["CodCor"].astype(str).str.strip()
+                filtro = (
+                    (df["Referencia"] == row["Referencia"]) &
+                    (df["CodCor"] == row["CodCor"])
+                )
 
-            filtro = (
-                (df["Referencia"] == ref_compra.strip()) &
-                (df["CodCor"] == cod_compra.strip())
-            )
-
-            if not df[filtro].empty:
                 df.loc[filtro, "CompraRealizada"] = True
                 df.to_excel(CAMINHO_ESTOQUE, index=False)
 
-                st.success("Compra marcada!")
+                st.success(f"{row['Referencia']} - {row['CodCor']} comprado")
                 st.rerun()
-            else:
-                st.warning("Item não encontrado")
 
     else:
         st.success("Estoque saudável 👍")
