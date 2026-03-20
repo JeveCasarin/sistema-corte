@@ -61,6 +61,11 @@ if not referencia or not cod_cores or not cores or not quantidades:
     
 if st.button("Adicionar/Atualizar Estoque"):
 
+    # validação
+    if not referencia or not cod_cores or not cores or not quantidades:
+        st.warning("Preencha tudo antes de salvar")
+        st.stop()
+
     if os.path.exists(CAMINHO_ESTOQUE):
         df = pd.read_excel(CAMINHO_ESTOQUE)
     else:
@@ -81,6 +86,8 @@ if st.button("Adicionar/Atualizar Estoque"):
             )
 
             if not df[filtro].empty:
+                # 🔥 AQUI É A DIFERENÇA
+                st.warning(f"Já existe: {referencia} - {cod} → Atualizado")
                 df.loc[filtro, "Quantidade"] = qtd
             else:
                 novo = pd.DataFrame({
@@ -93,7 +100,49 @@ if st.button("Adicionar/Atualizar Estoque"):
 
         df.to_excel(CAMINHO_ESTOQUE, index=False)
         st.success("Estoque atualizado!")
+        
+# ================= BAIXA NO ESTOQUE =================
+st.markdown("<h2 style='text-align: center;'>Dar Baixa no Estoque</h2>", unsafe_allow_html=True)
 
+ref_saida = st.text_input("Referência", key="saida_ref")
+cod_saida = st.text_input("Código da Cor", key="saida_cod")
+pecas_saida = st.number_input("Peças do Pedido", min_value=1, key="saida_pecas")
+
+if st.button("Dar Baixa"):
+    if not ref_saida or not cod_saida or not pecas_saida:
+        st.warning("Preencha tudo")
+        st.stop()
+
+    if os.path.exists(CAMINHO_ESTOQUE):
+        df = pd.read_excel(CAMINHO_ESTOQUE)
+
+        df["Referencia"] = df["Referencia"].astype(str).str.strip()
+        df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
+        filtro = (
+            (df["Referencia"] == ref_saida.strip()) &
+            (df["CodCor"] == cod_saida.strip())
+        )
+
+        if not df[filtro].empty:
+
+            # 🔥 CONVERSÃO
+            volume_usado = round(pecas_saida / 60, 2)
+
+            estoque_atual = df.loc[filtro, "Quantidade"].values[0]
+            novo_estoque = estoque_atual - volume_usado
+
+            if novo_estoque < 0:
+                st.error("Estoque insuficiente!")
+            else:
+                df.loc[filtro, "Quantidade"] = novo_estoque
+                df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+                st.success(f"Baixa realizada! (-{volume_usado} volumes)")
+
+        else:
+            st.warning("Item não encontrado")
+            
 # ================= BUSCA =================
 st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
 
