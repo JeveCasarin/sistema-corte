@@ -26,6 +26,22 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
+    if st.button("✔️ Todas ordens de compra feitas"):
+    df = pd.read_excel(CAMINHO_ESTOQUE)
+
+    if "CompraRealizada" not in df.columns:
+        df["CompraRealizada"] = False
+
+    filtro = (
+        (df["Quantidade"] <= 2) &
+        (df["CompraRealizada"] == False)
+    )
+
+    df.loc[filtro, "CompraRealizada"] = True
+    df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+    st.success("Todos os itens marcados como comprados!")
+    st.rerun()
 
         # ordena
         alerta = alerta.sort_values(by="Quantidade", ascending=True)
