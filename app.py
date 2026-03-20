@@ -209,3 +209,4 @@ if st.button("Excluir Item"):
             st.warning("Item não encontrado")
         else:
             st.success("Item excluído com sucesso!")
+            st.rerun()
