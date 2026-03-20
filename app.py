@@ -13,19 +13,42 @@ st.markdown("<h1 style='text-align: center;'>Sistema de Corte</h1>", unsafe_allo
 # ================= ALERTA DE COMPRA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
+CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
+
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
+
+    # garante que quantidade é número
     df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
 
+    # 🔥 FILTRO PRINCIPAL
     alerta = df_alerta[df_alerta["Quantidade"] <= 2]
 
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
-        st.dataframe(alerta)
+
+        # ordena
+        alerta = alerta.sort_values(by="Quantidade", ascending=True)
+
+        # 🔥 FUNÇÃO DE COR (CORRETA INDENTAÇÃO)
+        def cor_linha(row):
+            if row["Quantidade"] == 0:
+                return ["background-color: red; color: white"] * len(row)
+            elif row["Quantidade"] == 1:
+                return ["background-color: orange"] * len(row)
+            elif row["Quantidade"] == 2:
+                return ["background-color: yellow"] * len(row)
+            else:
+                return [""] * len(row)
+
+        # 🔥 APLICA COR
+        st.dataframe(alerta.style.apply(cor_linha, axis=1))
+
+        # salva alerta
         alerta.to_excel(CAMINHO_ALERTA, index=False)
+
     else:
         st.success("Estoque saudável 👍")
-
 # ================= PEDIDOS =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Pedido</h2>", unsafe_allow_html=True)
 
