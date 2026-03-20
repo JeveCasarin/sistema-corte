@@ -79,12 +79,9 @@ referencia = st.text_input("Referência")
 cod_cores = st.text_input("Códigos das Cores (ex: 11053,18018)")
 cores = st.text_input("Cores (ex: AREIA,CINZA)")
 quantidades = st.text_input("Volumes (ex: 4,4)")
-if not referencia or not cod_cores or not cores or not quantidades:
-    st.warning("Preencha todos os campos!")
-    
+
 if st.button("Adicionar/Atualizar Estoque"):
 
-    # validação
     if not referencia or not cod_cores or not cores or not quantidades:
         st.warning("Preencha tudo antes de salvar")
         st.stop()
@@ -92,7 +89,11 @@ if st.button("Adicionar/Atualizar Estoque"):
     if os.path.exists(CAMINHO_ESTOQUE):
         df = pd.read_excel(CAMINHO_ESTOQUE)
     else:
-        df = pd.DataFrame(columns=["Referencia", "CodCor", "Cor", "Quantidade"])
+        df = pd.DataFrame(columns=["Referencia", "CodCor", "Cor", "Quantidade", "CompraRealizada"])
+
+    # garante coluna
+    if "CompraRealizada" not in df.columns:
+        df["CompraRealizada"] = False
 
     lista_cod = [c.strip() for c in cod_cores.split(",")]
     lista_cores = [c.strip() for c in cores.split(",")]
@@ -109,15 +110,15 @@ if st.button("Adicionar/Atualizar Estoque"):
             )
 
             if not df[filtro].empty:
-                # 🔥 AQUI É A DIFERENÇA
-                st.warning(f"Já existe: {referencia} - {cod} → Atualizado")
                 df.loc[filtro, "Quantidade"] = qtd
+                df.loc[filtro, "CompraRealizada"] = False  # 🔥 reset
             else:
                 novo = pd.DataFrame({
                     "Referencia": [referencia],
                     "CodCor": [cod],
                     "Cor": [cor],
-                    "Quantidade": [qtd]
+                    "Quantidade": [qtd],
+                    "CompraRealizada": [False]
                 })
                 df = pd.concat([df, novo], ignore_index=True)
 
@@ -181,28 +182,71 @@ if st.button("Buscar"):
         else:
             st.dataframe(resultado)
 
-# ================= ALTERAR =================
-st.markdown("<h2 style='text-align: center;'>Alterar Quantidade</h2>", unsafe_allow_html=True)
+# ================= ALERTA DE COMPRA =================
+st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
-ref_alt = st.text_input("Referência", key="alt_ref")
-cod_alt = st.text_input("Código Cor", key="alt_cod")
-qtd_alt = st.number_input("Nova Quantidade", min_value=0, key="alt_qtd")
+CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
 
-if st.button("Atualizar"):
-    if os.path.exists(CAMINHO_ESTOQUE):
-        df = pd.read_excel(CAMINHO_ESTOQUE)
+if os.path.exists(CAMINHO_ESTOQUE):
+    df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
-        filtro = (
-            (df["Referencia"] == ref_alt.strip()) &
-            (df["CodCor"] == cod_alt.strip())
-        )
+    if "CompraRealizada" not in df_alerta.columns:
+        df_alerta["CompraRealizada"] = False
 
-        if not df[filtro].empty:
-            df.loc[filtro, "Quantidade"] = qtd_alt
-            df.to_excel(CAMINHO_ESTOQUE, index=False)
-            st.success("Atualizado!")
-        else:
-            st.warning("Não encontrado")
+    df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
+
+    alerta = df_alerta[
+        (df_alerta["Quantidade"] <= 2) &
+        (df_alerta["CompraRealizada"] == False)
+    ]
+
+    if not alerta.empty:
+        st.warning("Itens com estoque baixo!")
+
+        alerta = alerta.sort_values(by="Quantidade", ascending=True)
+
+        def cor_linha(row):
+            if row["Quantidade"] == 0:
+                return ["background-color: red; color: white"] * len(row)
+            elif row["Quantidade"] == 1:
+                return ["background-color: orange"] * len(row)
+            elif row["Quantidade"] == 2:
+                return ["background-color: yellow"] * len(row)
+            else:
+                return [""] * len(row)
+
+        st.dataframe(alerta.style.apply(cor_linha, axis=1))
+
+        alerta.to_excel(CAMINHO_ALERTA, index=False)
+
+        # 🔥 MARCAR COMO COMPRADO
+        st.markdown("### ✅ Marcar como comprado")
+
+        ref_compra = st.text_input("Referência", key="compra_ref")
+        cod_compra = st.text_input("Código da Cor", key="compra_cod")
+
+        if st.button("Confirmar Compra"):
+            df = pd.read_excel(CAMINHO_ESTOQUE)
+
+            df["Referencia"] = df["Referencia"].astype(str).str.strip()
+            df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
+            filtro = (
+                (df["Referencia"] == ref_compra.strip()) &
+                (df["CodCor"] == cod_compra.strip())
+            )
+
+            if not df[filtro].empty:
+                df.loc[filtro, "CompraRealizada"] = True
+                df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+                st.success("Compra marcada!")
+                st.rerun()
+            else:
+                st.warning("Item não encontrado")
+
+    else:
+        st.success("Estoque saudável 👍")
 
 # ================= EXCLUIR ITEM =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
