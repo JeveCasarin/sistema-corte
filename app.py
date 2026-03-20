@@ -181,26 +181,31 @@ if st.button("Atualizar"):
         else:
             st.warning("Não encontrado")
 
-# ================= EXCLUIR =================
+# ================= EXCLUIR ITEM =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
 
-ref_del = st.text_input("Referência", key="del_ref")
-cod_del = st.text_input("Código Cor", key="del_cod")
+ref_del = st.text_input("Referência", key="ref_del")
+codcor_del = st.text_input("Código da Cor", key="codcor_del")
 
-if st.button("Excluir"):
+if st.button("Excluir Item"):
     if os.path.exists(CAMINHO_ESTOQUE):
         df = pd.read_excel(CAMINHO_ESTOQUE)
 
+        df["Referencia"] = df["Referencia"].astype(str).str.strip()
+        df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
+        antes = len(df)
+
         df = df[~(
             (df["Referencia"] == ref_del.strip()) &
-            (df["CodCor"] == cod_del.strip())
+            (df["CodCor"] == codcor_del.strip())
         )]
 
+        depois = len(df)
+
         df.to_excel(CAMINHO_ESTOQUE, index=False)
-        st.success("Removido!")
 
-# ================= VISUAL =================
-st.markdown("<h2 style='text-align: center;'>Estoque Atual</h2>", unsafe_allow_html=True)
-
-if os.path.exists(CAMINHO_ESTOQUE):
-    st.dataframe(pd.read_excel(CAMINHO_ESTOQUE))
+        if antes == depois:
+            st.warning("Item não encontrado")
+        else:
+            st.success("Item excluído com sucesso!")
