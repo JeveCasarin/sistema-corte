@@ -18,34 +18,44 @@ CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
-    # garante que quantidade é número
+    # garante coluna
+    if "CompraRealizada" not in df_alerta.columns:
+        df_alerta["CompraRealizada"] = False
+
+    # garante número
     df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
 
-    # 🔥 FILTRO PRINCIPAL
-    alerta = df_alerta[df_alerta["Quantidade"] <= 2]
+    # 🔥 FILTRO CORRETO (ESSENCIAL)
+    alerta = df_alerta[
+        (df_alerta["Quantidade"] <= 2) &
+        (df_alerta["CompraRealizada"] == False)
+    ]
 
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
+
+        # 🔥 BOTÃO GLOBAL (CORRIGIDO)
         if st.button("✔️ Todas ordens de compra feitas"):
-    df = pd.read_excel(CAMINHO_ESTOQUE)
+            df = pd.read_excel(CAMINHO_ESTOQUE)
 
-    if "CompraRealizada" not in df.columns:
-        df["CompraRealizada"] = False
+            if "CompraRealizada" not in df.columns:
+                df["CompraRealizada"] = False
 
-    filtro = (
-        (df["Quantidade"] <= 2) &
-        (df["CompraRealizada"] == False)
-    )
+            filtro = (
+                (df["Quantidade"] <= 2) &
+                (df["CompraRealizada"] == False)
+            )
 
-    df.loc[filtro, "CompraRealizada"] = True
-    df.to_excel(CAMINHO_ESTOQUE, index=False)
+            df.loc[filtro, "CompraRealizada"] = True
+            df.to_excel(CAMINHO_ESTOQUE, index=False)
 
-    st.success("Todos os itens marcados como comprados!")
-    st.rerun()
+            st.success("Todos os itens marcados como comprados!")
+            st.rerun()
+
         # ordena
         alerta = alerta.sort_values(by="Quantidade", ascending=True)
 
-        # 🔥 FUNÇÃO DE COR (CORRETA INDENTAÇÃO)
+        # cor por linha
         def cor_linha(row):
             if row["Quantidade"] == 0:
                 return ["background-color: red; color: white"] * len(row)
@@ -56,7 +66,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
             else:
                 return [""] * len(row)
 
-        # 🔥 APLICA COR
+        # mostra tabela
         st.dataframe(alerta.style.apply(cor_linha, axis=1))
 
         # salva alerta
