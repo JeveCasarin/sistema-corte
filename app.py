@@ -3,6 +3,11 @@ import pandas as pd
 import os
 import shutil
 
+def cor_oc(val):
+    if val == True:
+        return "background-color: #2ecc71; color: white"
+    return ""
+
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
@@ -93,11 +98,6 @@ if st.button("Buscar"):
 # ================= LISTA =================
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
-def cor_oc(val):
-    if val == True:
-        return "background-color: #2ecc71; color: white"
-    return ""
-
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
@@ -106,13 +106,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    # 🔥 aplica estilo na coluna ORIGINAL
     styled = df.style.applymap(
         cor_oc,
         subset=["CompraRealizada"]
     )
 
-    # 🔥 renomeia só pra exibição
     styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
 
     st.dataframe(styled)
