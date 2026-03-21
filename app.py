@@ -6,7 +6,6 @@ import shutil
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
-CAMINHO_PEDIDOS = os.path.join(BASE_DIR, "pedidos.xlsx")
 CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
 
 st.markdown("<h1 style='text-align: center;'>Sistema de Corte</h1>", unsafe_allow_html=True)
@@ -29,45 +28,21 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
+        st.dataframe(alerta)
 
-        alerta = alerta.sort_values(by="Quantidade")
+        if st.button("✔️ Marcar todos como comprados"):
+            df_alerta.loc[
+                (df_alerta["Quantidade"] <= 2) &
+                (df_alerta["CompraRealizada"] == False),
+                "CompraRealizada"
+            ] = True
 
-        def cor_linha(row):
-            if row["CompraRealizada"]:
-                return ["background-color: #2ecc71; color: white"] * len(row)
-            if row["Quantidade"] == 0:
-                return ["background-color: red; color: white"] * len(row)
-            elif row["Quantidade"] == 1:
-                return ["background-color: orange"] * len(row)
-            elif row["Quantidade"] == 2:
-                return ["background-color: yellow"] * len(row)
-            return [""] * len(row)
-
-        alerta_view = alerta.copy()
-        alerta_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
-
-        st.dataframe(alerta_view.style.apply(cor_linha, axis=1))
-
-        col1, col2, col3 = st.columns([1,2,1])
-        with col2:
-            if st.button("✔️ Todas ordens de compra feitas"):
-                df = pd.read_excel(CAMINHO_ESTOQUE)
-
-                if "CompraRealizada" not in df.columns:
-                    df["CompraRealizada"] = False
-
-                filtro = (
-                    (df["Quantidade"] <= 2) &
-                    (df["CompraRealizada"] == False)
-                )
-
-                df.loc[filtro, "CompraRealizada"] = True
-                df.to_excel(CAMINHO_ESTOQUE, index=False)
-
-                st.success("Todos marcados como comprados!")
-                st.rerun()
+            df_alerta.to_excel(CAMINHO_ESTOQUE, index=False)
+            st.success("Atualizado!")
+            st.rerun()
 
         alerta.to_excel(CAMINHO_ALERTA, index=False)
+
     else:
         st.success("Estoque saudável 👍")
 
@@ -77,15 +52,10 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
-    df["Referencia"] = df["Referencia"].astype(str).str.strip()
-    df["CodCor"] = df["CodCor"].astype(str).str.strip()
+    if "CompraRealizada" not in df.columns:
+        df["CompraRealizada"] = False
 
-    df = df.sort_values(by=["Referencia", "CodCor"])
-
-    df_view = df.copy()
-    df_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
-
-    st.dataframe(df_view)
+    st.dataframe(df)
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
@@ -93,13 +63,13 @@ if os.path.exists(CAMINHO_ESTOQUE):
 else:
     st.info("Nenhum estoque cadastrado")
 
-# ================= RESTAURAR =================
+# ================= RESTAURAR BACKUP =================
 st.markdown("### 🔄 Restaurar Backup")
 
-arquivo_backup = st.file_uploader("Enviar backup", type=["xlsx"])
+arquivo_backup = st.file_uploader("Enviar arquivo .xlsx", type=["xlsx"])
 
 if arquivo_backup is not None:
-    if st.button("Restaurar"):
+    if st.button("Restaurar Backup"):
         df_backup = pd.read_excel(arquivo_backup)
 
         colunas = ["Referencia", "CodCor", "Cor", "Quantidade"]
@@ -114,6 +84,7 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
+
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
@@ -122,7 +93,7 @@ cod_cores = st.text_input("Códigos das Cores")
 cores = st.text_input("Cores")
 quantidades = st.text_input("Volumes")
 
-if st.button("Adicionar/Atualizar Estoque"):
+if st.button("Adicionar / Atualizar"):
 
     if not referencia or not cod_cores or not cores or not quantidades:
         st.warning("Preencha tudo")
@@ -164,6 +135,8 @@ if st.button("Adicionar/Atualizar Estoque"):
                 df = pd.concat([df, novo], ignore_index=True)
 
         df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+        # 🔥 backup automático
         shutil.copy(CAMINHO_ESTOQUE, os.path.join(BASE_DIR, "backup_estoque.xlsx"))
 
         st.success("Estoque atualizado!")
@@ -172,10 +145,10 @@ if st.button("Adicionar/Atualizar Estoque"):
 # ================= EXCLUIR =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
 
-ref_del = st.text_input("Referência", key="ref_del")
-codcor_del = st.text_input("Código da Cor", key="codcor_del")
+ref_del = st.text_input("Referência", key="del_ref")
+cod_del = st.text_input("Código da Cor", key="del_cod")
 
-if st.button("Excluir Item"):
+if st.button("Excluir"):
     if os.path.exists(CAMINHO_ESTOQUE):
         df = pd.read_excel(CAMINHO_ESTOQUE)
 
@@ -183,7 +156,7 @@ if st.button("Excluir Item"):
 
         df = df[~(
             (df["Referencia"].astype(str).str.strip() == ref_del.strip()) &
-            (df["CodCor"].astype(str).str.strip() == codcor_del.strip())
+            (df["CodCor"].astype(str).str.strip() == cod_del.strip())
         )]
 
         df.to_excel(CAMINHO_ESTOQUE, index=False)
@@ -191,5 +164,5 @@ if st.button("Excluir Item"):
         if len(df) == antes:
             st.warning("Item não encontrado")
         else:
-            st.success("Item excluído!")
+            st.success("Excluído!")
             st.rerun()
