@@ -68,29 +68,6 @@ if os.path.exists(CAMINHO_ESTOQUE):
     else:
         st.success("Estoque saudável 👍")
 
-# ================= PEDIDOS =================
-st.markdown("<h2 style='text-align: center;'>Cadastro de Pedido</h2>", unsafe_allow_html=True)
-
-cliente = st.text_input("Cliente")
-modelo = st.text_input("Modelo")
-quantidade = st.number_input("Quantidade de Peças", min_value=1)
-
-if st.button("Salvar Pedido"):
-    novo = pd.DataFrame({
-        "Cliente": [cliente],
-        "Modelo": [modelo],
-        "Quantidade": [quantidade]
-    })
-
-    if os.path.exists(CAMINHO_PEDIDOS):
-        df = pd.read_excel(CAMINHO_PEDIDOS)
-        df = pd.concat([df, novo], ignore_index=True)
-    else:
-        df = novo
-
-    df.to_excel(CAMINHO_PEDIDOS, index=False)
-    st.success("Pedido salvo!")
-
 # ================= ESTOQUE =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
@@ -226,9 +203,3 @@ if st.button("Excluir Item"):
         else:
             st.success("Item excluído!")
             st.rerun()
-
-# ================= VISUAL =================
-st.markdown("<h2 style='text-align: center;'>Estoque Atual</h2>", unsafe_allow_html=True)
-
-if os.path.exists(CAMINHO_ESTOQUE):
-    st.dataframe(pd.read_excel(CAMINHO_ESTOQUE))
