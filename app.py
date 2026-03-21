@@ -42,6 +42,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 return ["background-color: yellow"] * len(row)
             return [""] * len(row)
 
+        def cor_oc(val):
+            if val == True:
+                return "background-color: #2ecc71; color: white"
+            return ""
+
         # 🔥 estilo no original
         styled = alerta.style.apply(cor_linha, axis=1)
 
@@ -103,7 +108,12 @@ if os.path.exists(CAMINHO_ESTOQUE):
     df_view = df.copy()
     df_view.rename(columns={"CompraRealizada": "OC Realizada"}, inplace=True)
 
-    st.dataframe(df_view)
+    styled_df = df_view.style.applymap(
+    cor_oc, 
+    subset=["OC REALIZADA"]
+    )
+
+    st.dataframe(styled_df)
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
