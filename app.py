@@ -16,6 +16,7 @@ st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA<
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
+    # 🔥 garante coluna
     if "CompraRealizada" not in df_alerta.columns:
         df_alerta["CompraRealizada"] = False
 
@@ -31,9 +32,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        # ✅ versão limpa (SEM style)
+        # 🔥 coluna visual
         alerta_view = alerta.copy()
-        alerta_view["OC Realizada"] = alerta_view["CompraRealizada"].apply(lambda x: "✔️" if x else "")
+        alerta_view["OC Realizada"] = alerta_view["CompraRealizada"].apply(
+            lambda x: "✔️" if x else ""
+        )
 
         st.dataframe(alerta_view.drop(columns=["CompraRealizada"]))
 
@@ -86,18 +89,20 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
+    # 🔥 garante coluna
+    if "CompraRealizada" not in df.columns:
+        df["CompraRealizada"] = False
+
     df["Referencia"] = df["Referencia"].astype(str).str.strip()
     df["CodCor"] = df["CodCor"].astype(str).str.strip()
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    # 🔥 cria coluna visual
     df_view = df.copy()
     df_view["OC Realizada"] = df_view["CompraRealizada"].apply(
         lambda x: "✔️" if x else ""
     )
 
-    # 🔥 remove coluna original
     df_view = df_view.drop(columns=["CompraRealizada"])
 
     st.dataframe(df_view)
@@ -180,6 +185,8 @@ if st.button("Adicionar/Atualizar Estoque"):
                 df = pd.concat([df, novo], ignore_index=True)
 
         df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+        # 🔥 backup automático
         shutil.copy(CAMINHO_ESTOQUE, os.path.join(BASE_DIR, "backup_estoque.xlsx"))
 
         st.success("Estoque atualizado!")
