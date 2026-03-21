@@ -31,22 +31,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        # 🔥 função de cor
-        def cor_oc(val):
-            if val == True:
-                return "background-color: #2ecc71; color: white"
-            return ""
+        # ✅ versão limpa (SEM style)
+        alerta_view = alerta.copy()
+        alerta_view["OC Realizada"] = alerta_view["CompraRealizada"].apply(lambda x: "✔️" if x else "")
 
-        # 🔥 estilo usando coluna ORIGINAL
-        styled = alerta.style.applymap(
-            cor_oc,
-            subset=["CompraRealizada"]
-        )
-
-        # 🔥 renomeia só pra exibir
-        styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
-
-        st.dataframe(styled)
+        st.dataframe(alerta_view.drop(columns=["CompraRealizada"]))
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -102,16 +91,16 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    # 🔥 aplica estilo na coluna ORIGINAL
-    styled = df.style.applymap(
-        cor_oc,
-        subset=["CompraRealizada"]
+    # 🔥 cria coluna visual
+    df_view = df.copy()
+    df_view["OC Realizada"] = df_view["CompraRealizada"].apply(
+        lambda x: "✔️" if x else ""
     )
 
-    # 🔥 renomeia só pra exibição
-    styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
+    # 🔥 remove coluna original
+    df_view = df_view.drop(columns=["CompraRealizada"])
 
-    st.dataframe(styled)
+    st.dataframe(df_view)
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
