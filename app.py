@@ -3,12 +3,6 @@ import pandas as pd
 import os
 import shutil
 
-# ================= FUNÇÃO GLOBAL =================
-def cor_oc(val):
-    if val == True:
-        return "background-color: #2ecc71; color: white"
-    return ""
-
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
@@ -22,7 +16,7 @@ st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA<
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
-    # 🔥 GARANTE COLUNA
+    # 🔥 garante coluna
     if "CompraRealizada" not in df_alerta.columns:
         df_alerta["CompraRealizada"] = False
 
@@ -33,23 +27,16 @@ if os.path.exists(CAMINHO_ESTOQUE):
         (df_alerta["CompraRealizada"] == False)
     ]
 
-    # 🔥 GARANTE COLUNA NO ALERTA TAMBÉM
-    if "CompraRealizada" not in alerta.columns:
-        alerta["CompraRealizada"] = False
-
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        styled = alerta.style.applymap(
-            cor_oc,
-            subset=["CompraRealizada"]
-        )
+        # 🔥 visual simples e estável
+        alerta["OC Realizada"] = alerta["CompraRealizada"].apply(lambda x: "✔️" if x else "")
+        alerta_view = alerta.drop(columns=["CompraRealizada"])
 
-        styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
-
-        st.dataframe(styled)
+        st.dataframe(alerta_view)
 
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
@@ -99,7 +86,7 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
-    # 🔥 GARANTE COLUNA
+    # 🔥 garante coluna
     if "CompraRealizada" not in df.columns:
         df["CompraRealizada"] = False
 
@@ -108,14 +95,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    styled = df.style.applymap(
-        cor_oc,
-        subset=["CompraRealizada"]
-    )
+    # 🔥 visual
+    df["OC Realizada"] = df["CompraRealizada"].apply(lambda x: "✔️" if x else "")
+    df_view = df.drop(columns=["CompraRealizada"])
 
-    styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
-
-    st.dataframe(styled)
+    st.dataframe(df_view)
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
