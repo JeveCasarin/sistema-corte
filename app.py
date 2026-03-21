@@ -17,14 +17,14 @@ st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA<
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
-    if "CompraRealizada" not in df_alerta.columns:
-        df_alerta["CompraRealizada"] = False
+    if "OC Realizada" not in df_alerta.columns:
+        df_alerta["OC Realizada"] = False
 
     df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
 
     alerta = df_alerta[
         (df_alerta["Quantidade"] <= 2) &
-        (df_alerta["CompraRealizada"] == False)
+        (df_alerta["OC Realizada"] == False)
     ]
 
     if not alerta.empty:
@@ -33,7 +33,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
         alerta = alerta.sort_values(by="Quantidade", ascending=True)
 
         def cor_linha(row):
-            if row["CompraRealizada"]:
+            if row["OC Realizada"]:
                 return ["background-color: #2ecc71; color: white"] * len(row)
             if row["Quantidade"] == 0:
                 return ["background-color: red; color: white"] * len(row)
@@ -55,10 +55,10 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
                 filtro = (
                     (df["Quantidade"] <= 2) &
-                    (df["CompraRealizada"] == False)
+                    (df["OC Realizada"] == False)
                 )
 
-                df.loc[filtro, "CompraRealizada"] = True
+                df.loc[filtro, "OC Realizada"] = True
                 df.to_excel(CAMINHO_ESTOQUE, index=False)
 
                 st.success("Todos os itens marcados como comprados!")
@@ -200,7 +200,7 @@ if st.button("Dar Baixa"):
                 st.error("Estoque insuficiente!")
             else:
                 df.loc[filtro, "Quantidade"] = novo_estoque
-                df.loc[filtro, "CompraRealizada"] = False
+                df.loc[filtro, "OC Realizada"] = False
 
                 df.to_excel(CAMINHO_ESTOQUE, index=False)
 
