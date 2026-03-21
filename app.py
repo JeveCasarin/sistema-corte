@@ -47,8 +47,14 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 return "background-color: #2ecc71; color: white"
             return ""
 
-        # 🔥 estilo no original
-        styled = alerta.style.apply(cor_linha, axis=1)
+        # renomeia só pra tela
+        alerta_view = alerta.rename(columns={"CompraRealizada": "OC Realizada"})
+
+        # aplica cor só na coluna
+        styled = alerta_view.style.applymap(
+            cor_oc,
+        subset=["OC REALIZADA"]
+        )
 
         st.dataframe(styled)
 
