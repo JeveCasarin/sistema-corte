@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import shutil
 
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -98,9 +99,9 @@ if st.button("Salvar Pedido"):
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
 referencia = st.text_input("Referência")
-cod_cores = st.text_input("Códigos das Cores")
-cores = st.text_input("Cores")
-quantidades = st.text_input("Volumes")
+cod_cores = st.text_input("Códigos das Cores (ex: 11053,18018)")
+cores = st.text_input("Cores (ex: AREIA,CINZA)")
+quantidades = st.text_input("Volumes (ex: 4,4)")
 
 if st.button("Adicionar/Atualizar Estoque"):
 
@@ -143,31 +144,26 @@ if st.button("Adicionar/Atualizar Estoque"):
                 })
                 df = pd.concat([df, novo], ignore_index=True)
 
+        # 🔥 TEM QUE FICAR AQUI DENTRO
         df.to_excel(CAMINHO_ESTOQUE, index=False)
-
-        # 🔥 backup automático
-        shutil.copy(CAMINHO_ESTOQUE, os.path.join(BASE_DIR, "backup_estoque.xlsx"))
-
         st.success("Estoque atualizado!")
+        st.rerun()
+
 
 # ================= LISTA =================
-st.markdown("<h2 style='text-align: center;'>📦 Estoque Atual</h2>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
+    df["Referencia"] = df["Referencia"].astype(str).str.strip()
+    df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    df_view = df.rename(columns={"CompraRealizada": "OC Realizada"})
-
-    st.dataframe(df_view)
-
-    # download backup
-    with open(CAMINHO_ESTOQUE, "rb") as file:
-        st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
-
+    st.dataframe(df)
 else:
-    st.info("Nenhum estoque cadastrado")
+    st.info("Nenhum estoque cadastrado ainda.")
 
 # ================= RESTAURAR BACKUP =================
 st.markdown("### 🔄 Restaurar Backup")
