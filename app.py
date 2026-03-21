@@ -6,6 +6,7 @@ import shutil
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
+CAMINHO_PEDIDOS = os.path.join(BASE_DIR, "pedidos.xlsx")
 CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
 
 st.markdown("<h1 style='text-align: center;'>Sistema de Corte</h1>", unsafe_allow_html=True)
@@ -16,7 +17,6 @@ st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA<
 if os.path.exists(CAMINHO_ESTOQUE):
     df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
 
-    # 🔥 garante coluna
     if "CompraRealizada" not in df_alerta.columns:
         df_alerta["CompraRealizada"] = False
 
@@ -32,11 +32,21 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        # 🔥 visual simples e estável
-        alerta["OC Realizada"] = alerta["CompraRealizada"].apply(lambda x: "✔️" if x else "")
-        alerta_view = alerta.drop(columns=["CompraRealizada"])
+        def cor_linha(row):
+            if row["CompraRealizada"]:
+                return ["background-color: #2ecc71; color: white"] * len(row)
+            if row["Quantidade"] == 0:
+                return ["background-color: red; color: white"] * len(row)
+            elif row["Quantidade"] == 1:
+                return ["background-color: orange"] * len(row)
+            elif row["Quantidade"] == 2:
+                return ["background-color: yellow"] * len(row)
+            return [""] * len(row)
 
-        st.dataframe(alerta_view)
+        alerta_view = alerta.copy()
+        alerta_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
+
+        st.dataframe(alerta_view.style.apply(cor_linha, axis=1))
 
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
@@ -61,43 +71,19 @@ if os.path.exists(CAMINHO_ESTOQUE):
     else:
         st.success("Estoque saudável 👍")
 
-# ================= BUSCA =================
-st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
-
-busca = st.text_input("Digite referência ou código")
-
-if st.button("Buscar"):
-    if os.path.exists(CAMINHO_ESTOQUE):
-        df = pd.read_excel(CAMINHO_ESTOQUE)
-
-        resultado = df[
-            df["Referencia"].astype(str).str.contains(busca, case=False) |
-            df["CodCor"].astype(str).str.contains(busca, case=False)
-        ]
-
-        if resultado.empty:
-            st.warning("Não encontrado")
-        else:
-            st.dataframe(resultado)
-
 # ================= LISTA =================
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
-    # 🔥 garante coluna
-    if "CompraRealizada" not in df.columns:
-        df["CompraRealizada"] = False
-
     df["Referencia"] = df["Referencia"].astype(str).str.strip()
     df["CodCor"] = df["CodCor"].astype(str).str.strip()
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    # 🔥 visual
-    df["OC Realizada"] = df["CompraRealizada"].apply(lambda x: "✔️" if x else "")
-    df_view = df.drop(columns=["CompraRealizada"])
+    df_view = df.copy()
+    df_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
 
     st.dataframe(df_view)
 
@@ -128,7 +114,6 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
-
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
