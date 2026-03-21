@@ -31,30 +31,20 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        def cor_linha(row):
-            if row["CompraRealizada"]:
-                return ["background-color: #2ecc71; color: white"] * len(row)
-            if row["Quantidade"] == 0:
-                return ["background-color: red; color: white"] * len(row)
-            elif row["Quantidade"] == 1:
-                return ["background-color: orange"] * len(row)
-            elif row["Quantidade"] == 2:
-                return ["background-color: yellow"] * len(row)
-            return [""] * len(row)
-
+        # 🔥 função de cor
         def cor_oc(val):
             if val == True:
                 return "background-color: #2ecc71; color: white"
             return ""
 
-        # renomeia só pra tela
-        alerta_view = alerta.rename(columns={"CompraRealizada": "OC Realizada"})
-
-        # aplica cor só na coluna
-        styled = alerta_view.style.applymap(
+        # 🔥 estilo usando coluna ORIGINAL
+        styled = alerta.style.applymap(
             cor_oc,
-        subset=["OC REALIZADA"]
+            subset=["CompraRealizada"]
         )
+
+        # 🔥 renomeia só pra exibir
+        styled.data = styled.data.rename(columns={"CompraRealizada": "OC REALIZADA"})
 
         st.dataframe(styled)
 
@@ -78,9 +68,9 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 st.rerun()
 
         alerta.to_excel(CAMINHO_ALERTA, index=False)
+
     else:
         st.success("Estoque saudável 👍")
-
 # ================= BUSCA =================
 st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
 
