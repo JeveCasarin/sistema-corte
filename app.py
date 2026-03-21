@@ -44,7 +44,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
         )
 
         # 🔥 renomeia só pra exibir
-        styled.data = styled.data.rename(columns={"CompraRealizada": "OC REALIZADA"})
+        styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
 
         st.dataframe(styled)
 
@@ -93,6 +93,11 @@ if st.button("Buscar"):
 # ================= LISTA =================
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
+def cor_oc(val):
+    if val == True:
+        return "background-color: #2ecc71; color: white"
+    return ""
+
 if os.path.exists(CAMINHO_ESTOQUE):
     df = pd.read_excel(CAMINHO_ESTOQUE)
 
@@ -108,7 +113,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
     )
 
     # 🔥 renomeia só pra exibição
-    styled.data = styled.data.rename(columns={"CompraRealizada": "OC REALIZADA"})
+    styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
 
     st.dataframe(styled)
 
