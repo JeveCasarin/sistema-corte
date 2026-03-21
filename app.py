@@ -108,7 +108,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
     )
 
     # 🔥 renomeia só pra exibição
-    styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
+    styled.data = styled.data.rename(columns={"CompraRealizada": "OC REALIZADA"})
 
     st.dataframe(styled)
 
@@ -117,6 +117,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
 else:
     st.info("Nenhum estoque cadastrado")
+    
 # ================= RESTAURAR =================
 st.markdown("### 🔄 Restaurar Backup")
 
