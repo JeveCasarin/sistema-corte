@@ -146,6 +146,30 @@ if os.path.exists(CAMINHO_ESTOQUE):
         )
 else:
     st.info("Nenhum estoque cadastrado ainda.")
+    
+# =================RESTAURAR LISTA =================
+st.markdown("### 🔄 Restaurar Backup")
+
+arquivo_backup = st.file_uploader("Envie um arquivo de backup (.xlsx)", type=["xlsx"])
+
+if arquivo_backup is not None:
+    if st.button("Restaurar Estoque a partir do Backup"):
+        df_backup = pd.read_excel(arquivo_backup)
+
+        # validação básica
+        colunas_necessarias = ["Referencia", "CodCor", "Cor", "Quantidade"]
+
+        if not all(col in df_backup.columns for col in colunas_necessarias):
+            st.error("Arquivo inválido! Estrutura incorreta.")
+        else:
+            # garante coluna
+            if "CompraRealizada" not in df_backup.columns:
+                df_backup["CompraRealizada"] = False
+
+            df_backup.to_excel(CAMINHO_ESTOQUE, index=False)
+
+            st.success("Backup restaurado com sucesso!")
+            st.rerun()
 
 # ================= BAIXA =================
 st.markdown("<h2 style='text-align: center;'>Dar Baixa no Estoque</h2>", unsafe_allow_html=True)
