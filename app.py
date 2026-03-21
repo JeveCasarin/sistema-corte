@@ -70,6 +70,69 @@ if os.path.exists(CAMINHO_ESTOQUE):
     else:
         st.success("Estoque saudável 👍")
 
+# ================= BUSCA =================
+st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
+
+busca = st.text_input("Digite referência ou código")
+
+if st.button("Buscar"):
+    if os.path.exists(CAMINHO_ESTOQUE):
+        df = pd.read_excel(CAMINHO_ESTOQUE)
+
+        resultado = df[
+            df["Referencia"].astype(str).str.contains(busca, case=False) |
+            df["CodCor"].astype(str).str.contains(busca, case=False)
+        ]
+
+        if resultado.empty:
+            st.warning("Não encontrado")
+        else:
+            st.dataframe(resultado)
+
+# ================= LISTA =================
+st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
+
+if os.path.exists(CAMINHO_ESTOQUE):
+    df = pd.read_excel(CAMINHO_ESTOQUE)
+
+    df["Referencia"] = df["Referencia"].astype(str).str.strip()
+    df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
+    df = df.sort_values(by=["Referencia", "CodCor"])
+
+    df_view = df.copy()
+    df_view.rename(columns={"CompraRealizada": "OC Realizada"}, inplace=True)
+
+    st.dataframe(df_view)
+
+    with open(CAMINHO_ESTOQUE, "rb") as file:
+        st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
+
+else:
+    st.info("Nenhum estoque cadastrado")
+
+# ================= RESTAURAR =================
+st.markdown("### 🔄 Restaurar Backup")
+
+arquivo_backup = st.file_uploader("Enviar backup", type=["xlsx"])
+
+if arquivo_backup is not None:
+    if st.button("Restaurar"):
+        df_backup = pd.read_excel(arquivo_backup)
+
+        colunas = ["Referencia", "CodCor", "Cor", "Quantidade"]
+
+        if not all(col in df_backup.columns for col in colunas):
+            st.error("Arquivo inválido")
+        else:
+            if "CompraRealizada" not in df_backup.columns:
+                df_backup["CompraRealizada"] = False
+
+            df_backup.to_excel(CAMINHO_ESTOQUE, index=False)
+
+            st.success("Backup restaurado!")
+            st.rerun()
+
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
@@ -124,69 +187,6 @@ if st.button("Adicionar/Atualizar Estoque"):
 
         st.success("Estoque atualizado!")
         st.rerun()
-
-# ================= LISTA =================
-st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
-
-if os.path.exists(CAMINHO_ESTOQUE):
-    df = pd.read_excel(CAMINHO_ESTOQUE)
-
-    df["Referencia"] = df["Referencia"].astype(str).str.strip()
-    df["CodCor"] = df["CodCor"].astype(str).str.strip()
-
-    df = df.sort_values(by=["Referencia", "CodCor"])
-
-    df_view = df.copy()
-    df_view.rename(columns={"CompraRealizada": "OC Realizada"}, inplace=True)
-
-    st.dataframe(df_view)
-
-    with open(CAMINHO_ESTOQUE, "rb") as file:
-        st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
-
-else:
-    st.info("Nenhum estoque cadastrado")
-
-# ================= RESTAURAR =================
-st.markdown("### 🔄 Restaurar Backup")
-
-arquivo_backup = st.file_uploader("Enviar backup", type=["xlsx"])
-
-if arquivo_backup is not None:
-    if st.button("Restaurar"):
-        df_backup = pd.read_excel(arquivo_backup)
-
-        colunas = ["Referencia", "CodCor", "Cor", "Quantidade"]
-
-        if not all(col in df_backup.columns for col in colunas):
-            st.error("Arquivo inválido")
-        else:
-            if "CompraRealizada" not in df_backup.columns:
-                df_backup["CompraRealizada"] = False
-
-            df_backup.to_excel(CAMINHO_ESTOQUE, index=False)
-
-            st.success("Backup restaurado!")
-            st.rerun()
-
-# ================= BUSCA =================
-st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
-
-busca = st.text_input("Digite referência ou código")
-
-if st.button("Buscar"):
-    if os.path.exists(CAMINHO_ESTOQUE):
-        df = pd.read_excel(CAMINHO_ESTOQUE)
-
-        resultado = df[
-            df["Referencia"].astype(str).str.contains(busca, case=False) |
-            df["CodCor"].astype(str).str.contains(busca, case=False)
-        ]
-
-        if resultado.empty:
-            st.warning("Não encontrado")
-        else:
-            st.dataframe(resultado)
 
 # ================= EXCLUIR =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
