@@ -25,7 +25,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
     # garante número
     df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
 
-    # 🔥 FILTRO CORRETO (ESSENCIAL)
+    # filtro correto
     alerta = df_alerta[
         (df_alerta["Quantidade"] <= 2) &
         (df_alerta["CompraRealizada"] == False)
@@ -33,24 +33,6 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     if not alerta.empty:
         st.warning("Itens com estoque baixo!")
-
-        # 🔥 BOTÃO GLOBAL (CORRIGIDO)
-        if st.button("✔️ Todas ordens de compra feitas"):
-            df = pd.read_excel(CAMINHO_ESTOQUE)
-
-            if "CompraRealizada" not in df.columns:
-                df["CompraRealizada"] = False
-
-            filtro = (
-                (df["Quantidade"] <= 2) &
-                (df["CompraRealizada"] == False)
-            )
-
-            df.loc[filtro, "CompraRealizada"] = True
-            df.to_excel(CAMINHO_ESTOQUE, index=False)
-
-            st.success("Todos os itens marcados como comprados!")
-            st.rerun()
 
         # ordena
         alerta = alerta.sort_values(by="Quantidade", ascending=True)
@@ -69,33 +51,32 @@ if os.path.exists(CAMINHO_ESTOQUE):
         # mostra tabela
         st.dataframe(alerta.style.apply(cor_linha, axis=1))
 
+        # 🔥 BOTÃO CENTRALIZADO EMBAIXO
+        col1, col2, col3 = st.columns([1,2,1])
+
+        with col2:
+            if st.button("✔️ Todas ordens de compra feitas"):
+                df = pd.read_excel(CAMINHO_ESTOQUE)
+
+                if "CompraRealizada" not in df.columns:
+                    df["CompraRealizada"] = False
+
+                filtro = (
+                    (df["Quantidade"] <= 2) &
+                    (df["CompraRealizada"] == False)
+                )
+
+                df.loc[filtro, "CompraRealizada"] = True
+                df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+                st.success("Todos os itens marcados como comprados!")
+                st.rerun()
+
         # salva alerta
         alerta.to_excel(CAMINHO_ALERTA, index=False)
 
     else:
         st.success("Estoque saudável 👍")
-# ================= PEDIDOS =================
-st.markdown("<h2 style='text-align: center;'>Cadastro de Pedido</h2>", unsafe_allow_html=True)
-
-cliente = st.text_input("Cliente")
-modelo = st.text_input("Modelo")
-quantidade = st.number_input("Quantidade de Peças", min_value=1)
-
-if st.button("Salvar Pedido"):
-    novo = pd.DataFrame({
-        "Cliente": [cliente],
-        "Modelo": [modelo],
-        "Quantidade": [quantidade]
-    })
-
-    if os.path.exists(CAMINHO_PEDIDOS):
-        df = pd.read_excel(CAMINHO_PEDIDOS)
-        df = pd.concat([df, novo], ignore_index=True)
-    else:
-        df = novo
-
-    df.to_excel(CAMINHO_PEDIDOS, index=False)
-    st.success("Pedido salvo!")
 
 # ================= ESTOQUE =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
@@ -206,67 +187,6 @@ if st.button("Buscar"):
             st.warning("Não encontrado")
         else:
             st.dataframe(resultado)
-
-# ================= ALERTA DE COMPRA =================
-st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
-
-if os.path.exists(CAMINHO_ESTOQUE):
-    df_alerta = pd.read_excel(CAMINHO_ESTOQUE)
-
-    if "CompraRealizada" not in df_alerta.columns:
-        df_alerta["CompraRealizada"] = False
-
-    df_alerta["Quantidade"] = pd.to_numeric(df_alerta["Quantidade"], errors="coerce")
-
-    alerta = df_alerta[
-        (df_alerta["Quantidade"] <= 2) &
-        (df_alerta["CompraRealizada"] == False)
-    ]
-
-    if not alerta.empty:
-        st.warning("Itens com estoque baixo!")
-
-        alerta = alerta.sort_values(by="Quantidade", ascending=True)
-
-        def cor_linha(row):
-            if row["Quantidade"] == 0:
-                return ["background-color: red; color: white"] * len(row)
-            elif row["Quantidade"] == 1:
-                return ["background-color: orange"] * len(row)
-            elif row["Quantidade"] == 2:
-                return ["background-color: yellow"] * len(row)
-            else:
-                return [""] * len(row)
-
-        st.dataframe(alerta.style.apply(cor_linha, axis=1))
-
-        # 🔥 BOTÕES POR ITEM
-        st.markdown("### ✔️ Marcar como comprado")
-
-        for i, row in alerta.iterrows():
-            col1, col2, col3, col4, col5 = st.columns([2,2,2,2,1])
-
-            col1.write(row["Referencia"])
-            col2.write(row["CodCor"])
-            col3.write(row["Cor"])
-            col4.write(row["Quantidade"])
-
-            if col5.button("OK", key=f"btn_{i}"):
-                df = pd.read_excel(CAMINHO_ESTOQUE)
-
-                filtro = (
-                    (df["Referencia"] == row["Referencia"]) &
-                    (df["CodCor"] == row["CodCor"])
-                )
-
-                df.loc[filtro, "CompraRealizada"] = True
-                df.to_excel(CAMINHO_ESTOQUE, index=False)
-
-                st.success(f"{row['Referencia']} - {row['CodCor']} comprado")
-                st.rerun()
-
-    else:
-        st.success("Estoque saudável 👍")
 
 # ================= EXCLUIR ITEM =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
