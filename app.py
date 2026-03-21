@@ -106,7 +106,7 @@ if st.button("Adicionar/Atualizar Estoque"):
 
             if not df[filtro].empty:
                 df.loc[filtro, "Quantidade"] = qtd
-                df.loc[filtro, "OC Realizada"] = False
+                df.loc[filtro, "OCRealizada"] = False
             else:
                 novo = pd.DataFrame({
                     "Referencia": [referencia],
