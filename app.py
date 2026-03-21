@@ -168,3 +168,47 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
+
+# ================= BUSCA =================
+st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
+
+busca = st.text_input("Digite referência ou código")
+
+if st.button("Buscar"):
+    if os.path.exists(CAMINHO_ESTOQUE):
+        df = pd.read_excel(CAMINHO_ESTOQUE)
+
+        resultado = df[
+            df["Referencia"].astype(str).str.contains(busca, case=False) |
+            df["CodCor"].astype(str).str.contains(busca, case=False)
+        ]
+
+        if resultado.empty:
+            st.warning("Não encontrado")
+        else:
+            st.dataframe(resultado)
+
+# ================= EXCLUIR =================
+st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
+
+ref_del = st.text_input("Referência", key="ref_del")
+codcor_del = st.text_input("Código da Cor", key="codcor_del")
+
+if st.button("Excluir Item"):
+    if os.path.exists(CAMINHO_ESTOQUE):
+        df = pd.read_excel(CAMINHO_ESTOQUE)
+
+        antes = len(df)
+
+        df = df[~(
+            (df["Referencia"].astype(str).str.strip() == ref_del.strip()) &
+            (df["CodCor"].astype(str).str.strip() == codcor_del.strip())
+        )]
+
+        df.to_excel(CAMINHO_ESTOQUE, index=False)
+
+        if len(df) == antes:
+            st.warning("Item não encontrado")
+        else:
+            st.success("Item excluído!")
+            st.rerun()
