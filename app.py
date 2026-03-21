@@ -85,10 +85,10 @@ if st.button("Adicionar/Atualizar Estoque"):
     if os.path.exists(CAMINHO_ESTOQUE):
         df = pd.read_excel(CAMINHO_ESTOQUE)
     else:
-        df = pd.DataFrame(columns=["Referencia", "CodCor", "Cor", "Quantidade", "CompraRealizada"])
+        df = pd.DataFrame(columns=["Referencia", "CodCor", "Cor", "Quantidade", "OC Realizada"])
 
-    if "CompraRealizada" not in df.columns:
-        df["CompraRealizada"] = False
+    if "OC Realizada" not in df.columns:
+        df["OC Realizada"] = False
 
     lista_cod = [c.strip() for c in cod_cores.split(",")]
     lista_cores = [c.strip().upper() for c in cores.split(",")]
@@ -106,14 +106,14 @@ if st.button("Adicionar/Atualizar Estoque"):
 
             if not df[filtro].empty:
                 df.loc[filtro, "Quantidade"] = qtd
-                df.loc[filtro, "OCRealizada"] = False
+                df.loc[filtro, "OC Realizada"] = False
             else:
                 novo = pd.DataFrame({
                     "Referencia": [referencia],
                     "CodCor": [cod],
                     "Cor": [cor],
                     "Quantidade": [qtd],
-                    "CompraRealizada": [False]
+                    "OC Realizada": [False]
                 })
                 df = pd.concat([df, novo], ignore_index=True)
 
