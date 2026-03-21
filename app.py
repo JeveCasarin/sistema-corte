@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import shutil
 
+# ================= FUNÇÃO GLOBAL =================
 def cor_oc(val):
     if val == True:
         return "background-color: #2ecc71; color: white"
@@ -36,19 +37,11 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
         alerta = alerta.sort_values(by="Quantidade")
 
-        # 🔥 função de cor
-        def cor_oc(val):
-            if val == True:
-                return "background-color: #2ecc71; color: white"
-            return ""
-
-        # 🔥 estilo usando coluna ORIGINAL
         styled = alerta.style.applymap(
             cor_oc,
             subset=["CompraRealizada"]
         )
 
-        # 🔥 renomeia só pra exibir
         styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
 
         st.dataframe(styled)
@@ -73,9 +66,9 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 st.rerun()
 
         alerta.to_excel(CAMINHO_ALERTA, index=False)
-
     else:
         st.success("Estoque saudável 👍")
+
 # ================= BUSCA =================
 st.markdown("<h2 style='text-align: center;'>Buscar Estoque</h2>", unsafe_allow_html=True)
 
@@ -120,7 +113,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
 else:
     st.info("Nenhum estoque cadastrado")
-    
+
 # ================= RESTAURAR =================
 st.markdown("### 🔄 Restaurar Backup")
 
