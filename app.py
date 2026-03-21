@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 
+
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
@@ -107,31 +108,33 @@ if st.button("Adicionar/Atualizar Estoque"):
     if not (len(lista_cod) == len(lista_cores) == len(lista_qtd)):
         st.error("Dados não batem!")
     else:
-        for cod, cor, qtd in zip(lista_cod, lista_cores, lista_qtd):
+    for cod, cor, qtd in zip(lista_cod, lista_cores, lista_qtd):
 
-            filtro = (
-                (df["Referencia"] == referencia) &
-                (df["CodCor"] == cod)
-            )
+        filtro = (
+            (df["Referencia"] == referencia) &
+            (df["CodCor"] == cod)
+        )
 
-            if not df[filtro].empty:
-                df.loc[filtro, "Quantidade"] = qtd
-                df.loc[filtro, "CompraRealizada"] = False
-            else:
-                novo = pd.DataFrame({
-                    "Referencia": [referencia],
-                    "CodCor": [cod],
-                    "Cor": [cor],
-                    "Quantidade": [qtd],
-                    "CompraRealizada": [False]
-                })
-                df = pd.concat([df, novo], ignore_index=True)
+        if not df[filtro].empty:
+            df.loc[filtro, "Quantidade"] = qtd
+            df.loc[filtro, "CompraRealizada"] = False
+        else:
+            novo = pd.DataFrame({
+                "Referencia": [referencia],
+                "CodCor": [cod],
+                "Cor": [cor],
+                "Quantidade": [qtd],
+                "CompraRealizada": [False]
+            })
+            df = pd.concat([df, novo], ignore_index=True)
 
-        # 🔥 TEM QUE FICAR AQUI DENTRO
-        df.to_excel(CAMINHO_ESTOQUE, index=False)
-        st.success("Estoque atualizado!")
-        st.rerun()
+    df.to_excel(CAMINHO_ESTOQUE, index=False)
 
+    # 🔥 BACKUP
+    shutil.copy(CAMINHO_ESTOQUE, os.path.join(BASE_DIR, "backup_estoque.xlsx"))
+
+    st.success("Estoque atualizado!")
+    st.rerun()
 
 # ================= LISTA =================
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
@@ -145,6 +148,15 @@ if os.path.exists(CAMINHO_ESTOQUE):
     df = df.sort_values(by=["Referencia", "CodCor"])
 
     st.dataframe(df)
+
+    # 🔥 AQUI
+    with open(CAMINHO_ESTOQUE, "rb") as file:
+        st.download_button(
+            label="📥 Baixar Backup Estoque",
+            data=file,
+            file_name="estoque_backup.xlsx"
+        )
+
 else:
     st.info("Nenhum estoque cadastrado ainda.")
     
