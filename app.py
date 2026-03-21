@@ -137,7 +137,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
     df = df.sort_values(by=["Referencia", "CodCor"])
 
     df_view = df.copy()
-    df_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
+    df_view.rename(columns={"CompraRealizada": "OC Realizada"}, inplace=True)
 
     st.dataframe(df_view)
 
