@@ -101,22 +101,22 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     df = df.sort_values(by=["Referencia", "CodCor"])
 
-    df_view = df.copy()
-    df_view.rename(columns={"CompraRealizada": "OC Realizada"}, inplace=True)
-
-    styled_df = df_view.style.applymap(
-    cor_oc, 
-    subset=["OC REALIZADA"]
+    # 🔥 aplica estilo na coluna ORIGINAL
+    styled = df.style.applymap(
+        cor_oc,
+        subset=["CompraRealizada"]
     )
 
-    st.dataframe(styled_df)
+    # 🔥 renomeia só pra exibição
+    styled.data = styled.data.rename(columns={"CompraRealizada": "OC Realizada"})
+
+    st.dataframe(styled)
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
 
 else:
     st.info("Nenhum estoque cadastrado")
-
 # ================= RESTAURAR =================
 st.markdown("### 🔄 Restaurar Backup")
 
