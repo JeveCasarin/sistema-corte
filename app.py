@@ -6,7 +6,6 @@ import shutil
 # ================= CAMINHOS =================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_ESTOQUE = os.path.join(BASE_DIR, "estoque.xlsx")
-CAMINHO_PEDIDOS = os.path.join(BASE_DIR, "pedidos.xlsx")
 CAMINHO_ALERTA = os.path.join(BASE_DIR, "ALERTA_COMPRA.xlsx")
 
 st.markdown("<h1 style='text-align: center;'>Sistema de Corte</h1>", unsafe_allow_html=True)
@@ -43,10 +42,10 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 return ["background-color: yellow"] * len(row)
             return [""] * len(row)
 
-        alerta_view = alerta.copy()
-        alerta_view.rename(columns={"CompraRealizada": "OC REALIZADA"}, inplace=True)
+        # 🔥 estilo no original
+        styled = alerta.style.apply(cor_linha, axis=1)
 
-        st.dataframe(alerta_view.style.apply(cor_linha, axis=1))
+        st.dataframe(styled)
 
         col1, col2, col3 = st.columns([1,2,1])
         with col2:
