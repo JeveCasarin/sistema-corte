@@ -97,12 +97,11 @@ if st.button("Adicionar/Atualizar Estoque"):
     else:
         df = pd.DataFrame(columns=["Referencia", "CodCor", "Cor", "Quantidade", "CompraRealizada"])
 
-    # garante coluna
     if "CompraRealizada" not in df.columns:
         df["CompraRealizada"] = False
 
     lista_cod = [c.strip() for c in cod_cores.split(",")]
-    lista_cores = [c.strip() for c in cores.split(",")]
+    lista_cores = [c.strip().upper() for c in cores.split(",")]
     lista_qtd = [int(q.strip()) for q in quantidades.split(",")]
 
     if not (len(lista_cod) == len(lista_cores) == len(lista_qtd)):
@@ -117,7 +116,7 @@ if st.button("Adicionar/Atualizar Estoque"):
 
             if not df[filtro].empty:
                 df.loc[filtro, "Quantidade"] = qtd
-                df.loc[filtro, "CompraRealizada"] = False  # 🔥 reset
+                df.loc[filtro, "CompraRealizada"] = False
             else:
                 novo = pd.DataFrame({
                     "Referencia": [referencia],
@@ -128,9 +127,27 @@ if st.button("Adicionar/Atualizar Estoque"):
                 })
                 df = pd.concat([df, novo], ignore_index=True)
 
+        # 🔥 TEM QUE FICAR AQUI DENTRO
         df.to_excel(CAMINHO_ESTOQUE, index=False)
         st.success("Estoque atualizado!")
-        
+        st.rerun()
+
+
+# ================= LISTA =================
+st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
+
+if os.path.exists(CAMINHO_ESTOQUE):
+    df = pd.read_excel(CAMINHO_ESTOQUE)
+
+    df["Referencia"] = df["Referencia"].astype(str).str.strip()
+    df["CodCor"] = df["CodCor"].astype(str).str.strip()
+
+    df = df.sort_values(by=["Referencia", "CodCor"])
+
+    st.dataframe(df)
+else:
+    st.info("Nenhum estoque cadastrado ainda.")
+    
 # ================= BAIXA NO ESTOQUE =================
 st.markdown("<h2 style='text-align: center;'>Dar Baixa no Estoque</h2>", unsafe_allow_html=True)
 
