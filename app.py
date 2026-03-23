@@ -109,7 +109,11 @@ if st.button("Adicionar / Atualizar"):
 
     lista_cod = [c.strip() for c in cod_cores.split(",")]
     lista_cores = [c.strip().upper() for c in cores.split(",")]
+    try:
     lista_qtd = [int(q.strip()) for q in quantidades.split(",")]
+    except:
+    st.error("Quantidade inválida")
+    st.stop()
 
     if not (len(lista_cod) == len(lista_cores) == len(lista_qtd)):
         st.error("Dados não batem!")
