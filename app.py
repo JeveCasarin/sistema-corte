@@ -81,6 +81,7 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
 df = df.sort_values(by=["Referencia"])
+df = df.sort_values(by=["Referencia", "CodCor"])
 
 # ================= BUSCA =================
 busca = st.text_input("🔎 Buscar por Referência")
