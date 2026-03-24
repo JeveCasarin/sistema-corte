@@ -105,6 +105,13 @@ st.divider()
 ref_anterior = None
 
 for _, row in df.iterrows():
+    ref_atual = str(row["Referencia"])
+
+    # 👇 PRIMEIRO compara
+    if ref_anterior is not None and ref_anterior != ref_atual:
+        st.markdown("<hr style='margin: 6px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
+
+    # 👇 DEPOIS mostra o item
     col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
     col1.write(row["Referencia"])
@@ -121,12 +128,7 @@ for _, row in df.iterrows():
     else:
         col5.markdown("🟢 OK")
 
-    # 👉 AQUI (DEPOIS DE TUDO DO ITEM)
-    ref_atual = str(row["Referencia"])
-
-    if ref_anterior is not None and ref_anterior != ref_atual:
-        st.markdown("<hr style='margin: 6px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
-    
+    # 👇 ATUALIZA NO FINAL
     ref_anterior = ref_atual
 
     # ATUALIZAR QTD
