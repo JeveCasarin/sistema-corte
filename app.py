@@ -28,8 +28,17 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     if not alerta.empty:
         st.warning("⚠️ Fazer pedido desses itens AGORA")
-        st.dataframe(alerta[["Referencia", "CodCor", "Cor", "Quantidade"]])
-        
+
+        st.divider()
+
+        col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+
+        col1.markdown("**Referencia**")
+        col2.markdown("**CodCor**")
+        col3.markdown("**Cor**")
+        col4.markdown("**Qtd**")
+        col5.markdown("**Ação**")
+                
         for i, row in alerta.iterrows():
             col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
         
@@ -37,11 +46,12 @@ if os.path.exists(CAMINHO_ESTOQUE):
             col2.write(row["CodCor"])
             col3.write(row["Cor"])
             col4.write(row["Quantidade"])
-
+        
             if col5.button("Comprar", key=f"buy_{i}"):
                 df_alerta.loc[i, "CompraRealizada"] = True
                 df_alerta.to_excel(CAMINHO_ESTOQUE, index=False)
                 st.rerun()
+        st.divider()
 
         if st.button("✔️ Marcar todos como comprados"):
             df_alerta.loc[
