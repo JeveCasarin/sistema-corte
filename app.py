@@ -88,6 +88,8 @@ if busca:
         df["Referencia"].astype(str).str.contains(busca, case=False) |
         df["Cor"].astype(str).str.contains(busca, case=False)
     ]
+    
+st.divider()
 
 col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
