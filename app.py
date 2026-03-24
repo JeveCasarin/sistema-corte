@@ -80,6 +80,14 @@ st.divider()
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
+# ================= BUSCA =================
+busca = st.text_input("🔎 Buscar por Referência ou Cor")
+
+if busca:
+    df = df[
+        df["Referencia"].astype(str).str.contains(busca, case=False) |
+        df["Cor"].astype(str).str.contains(busca, case=False)
+    ]
 
 col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
@@ -89,17 +97,7 @@ col3.markdown("**Cor**")
 col4.markdown("**Qtd**")
 col5.markdown("**Status**")
 col6.markdown("**Atualizar**")
-
-# ================= BUSCA =================
-busca = st.text_input("🔎 Buscar por Referência ou Cor")
-
-if busca:
-    df = df[
-        df["Referencia"].astype(str).str.contains(busca, case=False) |
-        df["Cor"].astype(str).str.contains(busca, case=False)
-    ]
     
-
 for _, row in df.iterrows():
     col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
