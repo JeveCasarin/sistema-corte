@@ -81,7 +81,7 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
 
-df = df.sort_values(by=["Referencia", "CodCor"])
+df = df.sort_values(by=["Referencia"])
 
 # ================= BUSCA =================
 busca = st.text_input("🔎 Buscar por Referência")
@@ -122,11 +122,10 @@ for _, row in df.iterrows():
         col5.markdown("🟢 OK")
 
     # 👉 AQUI (DEPOIS DE TUDO DO ITEM)
-    if ref_anterior is not None:
-        if ref_anterior != ref_atual:
-            st.markdown("<hr style='margin: 5px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
-        else:
-            st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #333;'>", unsafe_allow_html=True)
+    ref_atual = str(row["Referencia"])
+
+    if ref_anterior is not None and ref_anterior != ref_atual:
+        st.markdown("<hr style='margin: 6px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
     
     ref_anterior = ref_atual
 
