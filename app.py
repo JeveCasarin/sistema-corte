@@ -112,7 +112,6 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
     
-    st.write("ID:", row.get("id"))
     # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
@@ -148,6 +147,7 @@ with col_btn:
     salvar = st.button("✔", key=f"save_{row['id']}")
 
 if salvar:
+    st.write("CLICOU NO ID:", row["id"])
     cursor.execute("""
     UPDATE estoque
     SET Quantidade = ?, CompraRealizada = 0
