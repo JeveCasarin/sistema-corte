@@ -86,7 +86,7 @@ else:
     st.info("Nenhum estoque cadastrado")
 
 # ================= RESTAURAR BACKUP =================
-st.markdown("<h3 style='text-align: center;'>### 🔄 Restaurar Backup</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center;'>🔄 Restaurar Backup</h3>", unsafe_allow_html=True)
 
 arquivo_backup = st.file_uploader("Enviar arquivo .xlsx", type=["xlsx"])
 
@@ -106,7 +106,7 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
-    st.divider()
+st.divider()
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
@@ -170,7 +170,7 @@ if st.button("Adicionar / Atualizar"):
 
         st.success("Estoque atualizado!")
         st.rerun()
-    st.divider()
+st.divider()
 # ================= EXCLUIR =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
 
