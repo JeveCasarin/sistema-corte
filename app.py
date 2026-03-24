@@ -101,7 +101,7 @@ col4.markdown("**Qtd**")
 col5.markdown("**Status**")
 col6.markdown("**Atualizar**")
 
-st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True)    
+st.markdown("<hr style='margin: 5px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
 
 ref_anterior = None
 
@@ -110,7 +110,7 @@ for _, row in df.iterrows():
 
     # 👇 PRIMEIRO compara
     if ref_anterior is not None and ref_anterior != ref_atual:
-        st.markdown("<hr style='margin: 6px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
+       st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True) 
 
     # 👇 DEPOIS mostra o item
     col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
