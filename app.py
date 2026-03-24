@@ -102,40 +102,33 @@ col6.markdown("**Atualizar**")
 
 st.markdown("<hr style='margin: 2px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
 
-ref_anterior = None
+ref_anterior = ""
 
-# Função segura para pegar quantidade
-def get_quantidade(row):
-    try:
-        return int(row["Quantidade"])
-    except:
-        return 0
-
-# Loop pelas linhas
 for _, row in df.iterrows():
-    ref_atual = str(row["Referencia"])
-    
-    # Linha separadora se mudar referência
-    if ref_anterior is not None and ref_anterior != ref_atual:
-        st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True)
+    ref_atual = str(row["Referencia"]).strip()
 
-    # Colunas da linha
-    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,4])
+    # 🔥 Linha separadora
+    if ref_anterior != "" and ref_anterior != ref_atual:
+        st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
+
+    # Colunas
+    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,3])
+
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
+
     qtd = get_quantidade(row)
     col4.write(qtd)
 
-    # Status
     if qtd <= 2:
         col5.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
     else:
         col5.markdown("🟢 OK")
 
-    # Campo e botão lado a lado dentro da coluna Atualizar
+    # Atualização
     sub1, sub2 = col6.columns([3, 1])
-    
+
     nova_qtd = sub1.number_input(
         "",
         min_value=0,
@@ -144,7 +137,7 @@ for _, row in df.iterrows():
         key=f"qtd_{row['id']}",
         label_visibility="collapsed"
     )
-    
+
     if sub2.button("✔", key=f"save_{row['id']}", use_container_width=True):
         cursor.execute("""
         UPDATE estoque
@@ -153,7 +146,9 @@ for _, row in df.iterrows():
         """, (nova_qtd, row["id"]))
         conn.commit()
         st.rerun()
-        ref_anterior = ref_atual
+
+    # 🔥 ATUALIZA SEMPRE NO FINAL
+    ref_anterior = ref_atual
 
 # 🔥 Backup download
 import io
