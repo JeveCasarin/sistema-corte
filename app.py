@@ -80,6 +80,9 @@ st.divider()
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
+
+df = df.sort_values(by=["Referencia"])
+
 # ================= BUSCA =================
 busca = st.text_input("🔎 Buscar por Referência")
 
@@ -90,7 +93,6 @@ if busca:
     ]
     
 st.divider()
-
 col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
 col1.markdown("**Referencia**")
@@ -99,7 +101,10 @@ col3.markdown("**Cor**")
 col4.markdown("**Qtd**")
 col5.markdown("**Status**")
 col6.markdown("**Atualizar**")
-    
+st.divider()    
+
+ref_anterior = None
+
 for _, row in df.iterrows():
     col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
@@ -117,8 +122,17 @@ for _, row in df.iterrows():
     else:
         col5.markdown("🟢 OK")
 
+    # 👉 AQUI (DEPOIS DE TUDO DO ITEM)
+    if ref_anterior is not None:
+        if ref_anterior != row["Referencia"]:
+            st.markdown("<hr style='border: 1px solid #888;'>", unsafe_allow_html=True)
+        else:
+            st.markdown("<hr style='border: 0.5px solid #333;'>", unsafe_allow_html=True)
+
+    ref_anterior = row["Referencia"]
+
     # ATUALIZAR QTD
-col_btn, col_input = col6.columns([1,1])
+col_btn, col_input = col6.columns([1,2])
 
 with col_input:
     nova_qtd = st.number_input(
