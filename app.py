@@ -29,8 +29,6 @@ if os.path.exists(CAMINHO_ESTOQUE):
     if not alerta.empty:
         st.warning("⚠️ Fazer pedido desses itens AGORA")
 
-        st.divider()
-
         col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
 
         col1.markdown("**Referencia**")
@@ -51,8 +49,7 @@ if os.path.exists(CAMINHO_ESTOQUE):
                 df_alerta.loc[i, "CompraRealizada"] = True
                 df_alerta.to_excel(CAMINHO_ESTOQUE, index=False)
                 st.rerun()
-        st.divider()
-
+                
         if st.button("✔️ Marcar todos como comprados"):
             df_alerta.loc[
                 (df_alerta["Quantidade"] <= 2) &
@@ -68,6 +65,8 @@ if os.path.exists(CAMINHO_ESTOQUE):
 
     else:
         st.success("Estoque saudável 👍")
+
+    st.divider()
 
 # ================= LISTA =================
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
@@ -87,7 +86,7 @@ else:
     st.info("Nenhum estoque cadastrado")
 
 # ================= RESTAURAR BACKUP =================
-st.markdown("### 🔄 Restaurar Backup")
+st.markdown("<h3 style='text-align: center;'>### 🔄 Restaurar Backup</h3>", unsafe_allow_html=True)
 
 arquivo_backup = st.file_uploader("Enviar arquivo .xlsx", type=["xlsx"])
 
@@ -107,7 +106,7 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
-
+    st.divider()
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
 
@@ -171,7 +170,7 @@ if st.button("Adicionar / Atualizar"):
 
         st.success("Estoque atualizado!")
         st.rerun()
-
+    st.divider()
 # ================= EXCLUIR =================
 st.markdown("<h2 style='text-align: center;'>Excluir Item</h2>", unsafe_allow_html=True)
 
