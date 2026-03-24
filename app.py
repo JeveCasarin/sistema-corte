@@ -97,10 +97,10 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
 
-    if row["CompraRealizada"] == 1:
-        col5.markdown("✅ Comprado")
+    if row["Quantidade"] <= 2:
+        col5.markdown("🔴 Pendente")
     else:
-        col5.markdown("❌ Pendente")
+        col5.markdown("🟢 OK")
         
 # 🔥 ADICIONA AQUI
 import io
@@ -117,7 +117,6 @@ st.download_button(
     "estoque_backup.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-st.divider()
 
 st.divider()
 
@@ -153,6 +152,8 @@ if arquivo_backup is not None:
 
             st.success("Backup restaurado!")
             st.rerun()
+            
+st.divider()
 
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
