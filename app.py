@@ -31,7 +31,14 @@ if os.path.exists(CAMINHO_ESTOQUE):
         st.dataframe(alerta[["Referencia", "CodCor", "Cor", "Quantidade"]])
         
         for i, row in alerta.iterrows():
-            if st.button(f"Comprar {row['Referencia']} - {row['Cor']}", key=f"buy_{i}"):
+            col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+        
+            col1.write(row["Referencia"])
+            col2.write(row["CodCor"])
+            col3.write(row["Cor"])
+            col4.write(row["Quantidade"])
+
+            if col5.button("Comprar", key=f"buy_{i}"):
                 df_alerta.loc[i, "CompraRealizada"] = True
                 df_alerta.to_excel(CAMINHO_ESTOQUE, index=False)
                 st.rerun()
