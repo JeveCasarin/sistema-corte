@@ -120,7 +120,7 @@ for _, row in df.iterrows():
         st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True)
 
     # Colunas da linha
-    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
+    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,4])
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
@@ -133,8 +133,10 @@ for _, row in df.iterrows():
     else:
         col5.markdown("🟢 OK")
 
-    # Input + botão de atualizar quantidade
-    nova_qtd = col6.number_input(
+    # Campo e botão lado a lado dentro da coluna Atualizar
+    sub1, sub2 = col6.columns([3, 1])
+    
+    nova_qtd = sub1.number_input(
         "",
         min_value=0,
         max_value=999,
@@ -142,7 +144,8 @@ for _, row in df.iterrows():
         key=f"qtd_{row['id']}",
         label_visibility="collapsed"
     )
-    if col6.button("✔", key=f"save_{row['id']}"):
+    
+    if sub2.button("✔", key=f"save_{row['id']}", use_container_width=True):
         cursor.execute("""
         UPDATE estoque
         SET Quantidade = ?, CompraRealizada = 0
@@ -150,8 +153,7 @@ for _, row in df.iterrows():
         """, (nova_qtd, row["id"]))
         conn.commit()
         st.rerun()
-
-    ref_anterior = ref_atual
+        ref_anterior = ref_atual
 
 # 🔥 Backup download
 import io
