@@ -98,10 +98,13 @@ for _, row in df.iterrows():
     col4.write(row["Quantidade"])
 
     if row["Quantidade"] <= 2:
-        col5.markdown("🔴 FAZER OC")
+        if row["CompraRealizada"] == 1:
+            col5.markdown("🟡 OC REALIZADA")
+        else:
+            col5.markdown("🔴 FAZER OC")
     else:
         col5.markdown("🟢 OK")
-        
+            
 # 🔥 ADICIONA AQUI
 import io
 
