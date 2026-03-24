@@ -100,7 +100,8 @@ col3.markdown("**Cor**")
 col4.markdown("**Qtd**")
 col5.markdown("**Status**")
 col6.markdown("**Atualizar**")
-st.divider()    
+
+st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True)    
 
 ref_anterior = None
 
