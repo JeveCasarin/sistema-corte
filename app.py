@@ -77,7 +77,26 @@ if os.path.exists(CAMINHO_ESTOQUE):
     if "CompraRealizada" not in df.columns:
         df["CompraRealizada"] = False
 
-    st.dataframe(df)
+    col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+
+    col1.markdown("**Referencia**")
+    col2.markdown("**CodCor**")
+    col3.markdown("**Cor**")
+    col4.markdown("**Qtd**")
+    col5.markdown("**Status**")
+    
+    for i, row in df.iterrows():
+        col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+    
+        col1.write(row["Referencia"])
+        col2.write(row["CodCor"])
+        col3.write(row["Cor"])
+        col4.write(row["Quantidade"])
+
+        if row["CompraRealizada"]:
+            col5.markdown("✅ Comprado")
+        else:
+            col5.markdown("❌ Pendente")
 
     with open(CAMINHO_ESTOQUE, "rb") as file:
         st.download_button("📥 Baixar Backup", file, "estoque_backup.xlsx")
