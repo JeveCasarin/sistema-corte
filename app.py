@@ -81,7 +81,7 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
 # ================= BUSCA =================
-busca = st.text_input("🔎 Buscar por Referência ou Cor")
+busca = st.text_input("🔎 Buscar por Referência")
 
 if busca:
     df = df[
@@ -119,19 +119,35 @@ for _, row in df.iterrows():
 
     # ATUALIZAR QTD
     nova_qtd = col6.number_input(
-        "Qtd",
+        "",
         min_value=0,
+        max_value=99,
         value=int(row["Quantidade"]),
-        key=f"qtd_{row['id']}"
+        key=f"qtd_{row['id']}",
+        label_visibility="collapsed"
     )
+    col_btn, col_input = col6.columns([1,1])
 
-    if col6.button("Salvar", key=f"save_{row['id']}"):
+    with col_input:
+        nova_qtd = st.number_input(
+            "",
+            min_value=0,
+            max_value=99,
+            value=int(row["Quantidade"]),
+            key=f"qtd_{row['id']}",
+            label_visibility="collapsed"
+        )
+    
+    with col_btn:
+        salvar = st.button("✔", key=f"save_{row['id']}")
+    
+    if salvar:
         cursor.execute("""
         UPDATE estoque
         SET Quantidade = ?, CompraRealizada = 0
         WHERE id = ?
         """, (nova_qtd, row["id"]))
-
+    
         conn.commit()
         st.rerun()
             
