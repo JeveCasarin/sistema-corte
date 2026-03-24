@@ -90,8 +90,7 @@ if busca:
     df = df[
         df["Referencia"].astype(str).str.contains(busca, case=False) |
         df["Cor"].astype(str).str.contains(busca, case=False)
-    ]
-    
+    ]  
 st.divider()
 col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
@@ -112,7 +111,8 @@ for _, row in df.iterrows():
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
-
+    
+    st.write(row)
     # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
@@ -125,14 +125,14 @@ for _, row in df.iterrows():
     # 👉 AQUI (DEPOIS DE TUDO DO ITEM)
     if ref_anterior is not None:
         if ref_anterior != row["Referencia"]:
-            st.markdown("<hr style='border: 1px solid #888;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 5px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
         else:
-            st.markdown("<hr style='border: 0.5px solid #333;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #333;'>", unsafe_allow_html=True)
 
     ref_anterior = row["Referencia"]
 
     # ATUALIZAR QTD
-col_btn, col_input = col6.columns([1,2])
+col_btn, col_input = col6.columns([1,3])
 
 with col_input:
     nova_qtd = st.number_input(
