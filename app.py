@@ -98,7 +98,7 @@ for _, row in df.iterrows():
     col4.write(row["Quantidade"])
 
     if row["Quantidade"] <= 2:
-        col5.markdown("🔴 Pendente")
+        col5.markdown("🔴 Fazer OC")
     else:
         col5.markdown("🟢 OK")
         
