@@ -118,7 +118,10 @@ for _, row in df.iterrows():
         col5.markdown("🟢 OK")
 
     # ATUALIZAR QTD
-    nova_qtd = col6.number_input(
+col_btn, col_input = col6.columns([1,1])
+
+with col_input:
+    nova_qtd = st.number_input(
         "",
         min_value=0,
         max_value=99,
@@ -126,30 +129,19 @@ for _, row in df.iterrows():
         key=f"qtd_{row['id']}",
         label_visibility="collapsed"
     )
-    col_btn, col_input = col6.columns([1,1])
 
-    with col_input:
-        nova_qtd = st.number_input(
-            "",
-            min_value=0,
-            max_value=99,
-            value=int(row["Quantidade"]),
-            key=f"qtd_{row['id']}",
-            label_visibility="collapsed"
-        )
-    
-    with col_btn:
-        salvar = st.button("✔", key=f"save_{row['id']}")
-    
-    if salvar:
-        cursor.execute("""
-        UPDATE estoque
-        SET Quantidade = ?, CompraRealizada = 0
-        WHERE id = ?
-        """, (nova_qtd, row["id"]))
-    
-        conn.commit()
-        st.rerun()
+with col_btn:
+    salvar = st.button("✔", key=f"save_{row['id']}")
+
+if salvar:
+    cursor.execute("""
+    UPDATE estoque
+    SET Quantidade = ?, CompraRealizada = 0
+    WHERE id = ?
+    """, (nova_qtd, row["id"]))
+
+    conn.commit()
+    st.rerun()
             
 # 🔥 ADICIONA AQUI
 import io
