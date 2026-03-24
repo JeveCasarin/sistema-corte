@@ -92,7 +92,7 @@ if busca:
     ]
 
 # Cabeçalhos da tabela
-col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
+col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,4])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
