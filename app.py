@@ -112,7 +112,6 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
 
-    st.write("ANTES:", ref_anterior, "ATUAL:", row["Referencia"])
     # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
@@ -124,12 +123,12 @@ for _, row in df.iterrows():
 
     # 👉 AQUI (DEPOIS DE TUDO DO ITEM)
     if ref_anterior is not None:
-        if ref_anterior != row["Referencia"]:
+        if ref_anterior != ref_atual:
             st.markdown("<hr style='margin: 5px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
         else:
             st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #333;'>", unsafe_allow_html=True)
-
-    ref_anterior = row["Referencia"]
+    
+    ref_anterior = ref_atual
 
     # ATUALIZAR QTD
 col_btn, col_input = col6.columns([1,2])
