@@ -27,8 +27,14 @@ if os.path.exists(CAMINHO_ESTOQUE):
     ]
 
     if not alerta.empty:
-        st.warning("Itens com estoque baixo!")
-        st.dataframe(alerta)
+        st.warning("⚠️ Fazer pedido desses itens AGORA")
+        st.dataframe(alerta[["Referencia", "CodCor", "Cor", "Quantidade"]])
+        
+        for i, row in alerta.iterrows():
+            if st.button(f"Comprar {row['Referencia']} - {row['Cor']}", key=f"buy_{i}"):
+                df_alerta.loc[i, "CompraRealizada"] = True
+                df_alerta.to_excel(CAMINHO_ESTOQUE, index=False)
+                st.rerun()
 
         if st.button("✔️ Marcar todos como comprados"):
             df_alerta.loc[
@@ -114,6 +120,9 @@ if st.button("Adicionar / Atualizar"):
     except:
         st.error("Quantidade inválida")
         st.stop()
+    if any(q < 0 for q in lista_qtd):
+        st.error("Quantidade inválida (não pode ser negativa)")
+        st.stop()    
 
     if not (len(lista_cod) == len(lista_cores) == len(lista_qtd)):
         st.error("Dados não batem!")
