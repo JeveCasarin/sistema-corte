@@ -80,7 +80,6 @@ st.divider()
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
-
 df = df.sort_values(by=["Referencia"])
 
 # ================= BUSCA =================
@@ -90,10 +89,10 @@ if busca:
     df = df[
         df["Referencia"].astype(str).str.contains(busca, case=False) |
         df["Cor"].astype(str).str.contains(busca, case=False)
-    ]  
-    
-col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
+    ]
 
+# Cabeçalhos da tabela
+col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
@@ -105,65 +104,58 @@ st.markdown("<hr style='margin: 2px 0; border: 1px solid #888;'>", unsafe_allow_
 
 ref_anterior = None
 
+# Função segura para pegar quantidade
+def get_quantidade(row):
+    try:
+        return int(row["Quantidade"])
+    except:
+        return 0
+
+# Loop pelas linhas
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"])
-
-    # 👇 PRIMEIRO compara
+    
+    # Linha separadora se mudar referência
     if ref_anterior is not None and ref_anterior != ref_atual:
-       st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True) 
+        st.markdown("<hr style='margin: 2px 0;'>", unsafe_allow_html=True)
 
-    # 👇 DEPOIS mostra o item
+    # Colunas da linha
     col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
-
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
-    col4.write(row["Quantidade"])
+    qtd = get_quantidade(row)
+    col4.write(qtd)
 
-    # STATUS
-    if row["Quantidade"] <= 2:
-        if row["CompraRealizada"] == 1:
-            col5.markdown("🟡 OC REALIZADA")
-        else:
-            col5.markdown("🔴 FAZER OC")
+    # Status
+    if qtd <= 2:
+        col5.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
     else:
         col5.markdown("🟢 OK")
 
-    # 👇 ATUALIZA NO FINAL
-    ref_anterior = ref_atual
-
-    # ATUALIZAR QTD
-col_btn, col_input = col6.columns([1,2])
-
-with col_input:
-    nova_qtd = st.number_input(
+    # Input + botão de atualizar quantidade
+    nova_qtd = col6.number_input(
         "",
         min_value=0,
-        max_value=99,
-        value=int(row["Quantidade"]),
+        max_value=999,
+        value=qtd,
         key=f"qtd_{row['id']}",
         label_visibility="collapsed"
     )
+    if col6.button("✔", key=f"save_{row['id']}"):
+        cursor.execute("""
+        UPDATE estoque
+        SET Quantidade = ?, CompraRealizada = 0
+        WHERE id = ?
+        """, (nova_qtd, row["id"]))
+        conn.commit()
+        st.rerun()
 
-with col_btn:
-    salvar = st.button("✔", key=f"save_{row['id']}")
+    ref_anterior = ref_atual
 
-if salvar:
-    st.write("CLICOU NO ID:", row["id"])
-    cursor.execute("""
-    UPDATE estoque
-    SET Quantidade = ?, CompraRealizada = 0
-    WHERE id = ?
-    """, (nova_qtd, row["id"]))
-
-    conn.commit()
-    st.rerun()
-            
-# 🔥 ADICIONA AQUI
+# 🔥 Backup download
 import io
-
 df_backup = pd.read_sql("SELECT * FROM estoque", conn)
-
 buffer = io.BytesIO()
 df_backup.to_excel(buffer, index=False)
 buffer.seek(0)
@@ -174,9 +166,8 @@ st.download_button(
     "estoque_backup.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-    
-st.divider()
 
+st.divider()
 # ================= RESTAURAR BACKUP =================
 st.markdown("<h3 style='text-align: center;'>🔄 Restaurar Backup</h3>", unsafe_allow_html=True)
 
