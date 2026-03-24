@@ -112,7 +112,7 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
     
-    st.write(row)
+    st.write("ID:", row.get("id"))
     # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
