@@ -81,22 +81,34 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
 
-col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
 col4.markdown("**Qtd**")
 col5.markdown("**Status**")
+col6.markdown("**Atualizar**")
+
+# ================= BUSCA =================
+busca = st.text_input("🔎 Buscar por Referência ou Cor")
+
+if busca:
+    df = df[
+        df["Referencia"].astype(str).str.contains(busca, case=False) |
+        df["Cor"].astype(str).str.contains(busca, case=False)
+    ]
+    
 
 for _, row in df.iterrows():
-    col1, col2, col3, col4, col5 = st.columns([2,2,2,1,2])
+    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,2])
 
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
 
+    # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
             col5.markdown("🟡 OC REALIZADA")
@@ -104,6 +116,24 @@ for _, row in df.iterrows():
             col5.markdown("🔴 FAZER OC")
     else:
         col5.markdown("🟢 OK")
+
+    # ATUALIZAR QTD
+    nova_qtd = col6.number_input(
+        "Qtd",
+        min_value=0,
+        value=int(row["Quantidade"]),
+        key=f"qtd_{row['id']}"
+    )
+
+    if col6.button("Salvar", key=f"save_{row['id']}"):
+        cursor.execute("""
+        UPDATE estoque
+        SET Quantidade = ?, CompraRealizada = 0
+        WHERE id = ?
+        """, (nova_qtd, row["id"]))
+
+        conn.commit()
+        st.rerun()
             
 # 🔥 ADICIONA AQUI
 import io
@@ -120,7 +150,7 @@ st.download_button(
     "estoque_backup.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
+    
 st.divider()
 
 # ================= RESTAURAR BACKUP =================
