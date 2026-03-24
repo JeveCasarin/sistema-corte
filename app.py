@@ -101,8 +101,58 @@ for _, row in df.iterrows():
         col5.markdown("✅ Comprado")
     else:
         col5.markdown("❌ Pendente")
+        
+# 🔥 ADICIONA AQUI
+import io
+
+df_backup = pd.read_sql("SELECT * FROM estoque", conn)
+
+buffer = io.BytesIO()
+df_backup.to_excel(buffer, index=False)
+buffer.seek(0)
+
+st.download_button(
+    "📥 Baixar Backup",
+    buffer,
+    "estoque_backup.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+st.divider()
 
 st.divider()
+
+# ================= RESTAURAR BACKUP =================
+st.markdown("<h3 style='text-align: center;'>🔄 Restaurar Backup</h3>", unsafe_allow_html=True)
+
+arquivo_backup = st.file_uploader("Enviar arquivo .xlsx", type=["xlsx"])
+
+if arquivo_backup is not None:
+    if st.button("Restaurar Backup"):
+        df_backup = pd.read_excel(arquivo_backup)
+
+        colunas = ["Referencia", "CodCor", "Cor", "Quantidade"]
+
+        if not all(col in df_backup.columns for col in colunas):
+            st.error("Arquivo inválido")
+        else:
+            cursor.execute("DELETE FROM estoque")
+
+            for _, row in df_backup.iterrows():
+                cursor.execute("""
+                INSERT INTO estoque (Referencia, CodCor, Cor, Quantidade, CompraRealizada)
+                VALUES (?, ?, ?, ?, ?)
+                """, (
+                    row["Referencia"],
+                    row["CodCor"],
+                    row["Cor"],
+                    int(row["Quantidade"]),
+                    int(bool(row.get("CompraRealizada", False)))
+                ))
+
+            conn.commit()
+
+            st.success("Backup restaurado!")
+            st.rerun()
 
 # ================= CADASTRO =================
 st.markdown("<h2 style='text-align: center;'>Cadastro de Estoque</h2>", unsafe_allow_html=True)
