@@ -81,7 +81,7 @@ st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_al
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
 
-df = df.sort_values(by=["Referencia"])
+df = df.sort_values(by=["Referencia", "CodCor"])
 
 # ================= BUSCA =================
 busca = st.text_input("🔎 Buscar por Referência")
@@ -111,7 +111,8 @@ for _, row in df.iterrows():
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
     col4.write(row["Quantidade"])
-    
+
+    st.write("ANTES:", ref_anterior, "ATUAL:", row["Referencia"])
     # STATUS
     if row["Quantidade"] <= 2:
         if row["CompraRealizada"] == 1:
@@ -131,7 +132,7 @@ for _, row in df.iterrows():
     ref_anterior = row["Referencia"]
 
     # ATUALIZAR QTD
-col_btn, col_input = col6.columns([1,3])
+col_btn, col_input = col6.columns([1,2])
 
 with col_input:
     nova_qtd = st.number_input(
