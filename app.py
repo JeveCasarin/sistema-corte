@@ -80,7 +80,6 @@ st.divider()
 st.markdown("<h3 style='text-align: center;'>📦 Estoque Atual</h3>", unsafe_allow_html=True)
 
 df = pd.read_sql("SELECT * FROM estoque", conn)
-df = df.sort_values(by=["Referencia"])
 df = df.sort_values(by=["Referencia", "CodCor"])
 
 # ================= BUSCA =================
@@ -88,12 +87,22 @@ busca = st.text_input("🔎 Buscar por Referência")
 
 if busca:
     df = df[
-        df["Referencia"].astype(str).str.contains(busca, case=False) |
-        df["Cor"].astype(str).str.contains(busca, case=False)
+        df["Referencia"].astype(str).str.contains(busca, case=False, na=False) |
+        df["Cor"].astype(str).str.contains(busca, case=False, na=False)
     ]
 
+# Função segura para pegar quantidade
+def get_quantidade(row):
+    valor = row.get("Quantidade", 0)
+    if pd.isna(valor):
+        return 0
+    try:
+        return int(valor)
+    except:
+        return 0
+
 # Cabeçalhos da tabela
-col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,4])
+col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 1, 2, 4])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
@@ -108,12 +117,11 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
-    # 🔥 Linha separadora
+    # Linha divisória entre referências diferentes
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
-    # Colunas
-    col1, col2, col3, col4, col5, col6 = st.columns([2,2,2,1,2,3])
+    col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 1, 2, 4])
 
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
@@ -127,7 +135,6 @@ for _, row in df.iterrows():
     else:
         col5.markdown("🟢 OK")
 
-    # Atualização
     sub1, sub2 = col6.columns([3, 1])
 
     nova_qtd = sub1.number_input(
@@ -141,14 +148,13 @@ for _, row in df.iterrows():
 
     if sub2.button("✔", key=f"save_{row['id']}", use_container_width=True):
         cursor.execute("""
-        UPDATE estoque
-        SET Quantidade = ?, CompraRealizada = 0
-        WHERE id = ?
+            UPDATE estoque
+            SET Quantidade = ?, CompraRealizada = 0
+            WHERE id = ?
         """, (nova_qtd, row["id"]))
         conn.commit()
         st.rerun()
 
-    # 🔥 ATUALIZA SEMPRE NO FINAL
     ref_anterior = ref_atual
 
 # 🔥 Backup download
