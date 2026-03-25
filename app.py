@@ -2,30 +2,6 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 
-st.markdown("""
-<style>
-
-/* caixa do number_input */
-div[data-baseweb="input"] {
-    width: 70px !important;
-}
-
-/* campo interno */
-div[data-baseweb="input"] input {
-    height: 28px !important;
-    font-size: 13px !important;
-    text-align: center !important;
-}
-
-/* botões + e - */
-div[data-baseweb="input"] button {
-    padding: 2px 6px !important;
-    font-size: 12px !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 # ================= CONEXÃO =================
 def conectar():
     return sqlite3.connect("estoque.db", check_same_thread=False)
