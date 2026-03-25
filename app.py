@@ -50,7 +50,7 @@ st.divider()
 
 st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
 
-    ref_anterior_alerta = ""
+ref_anterior_alerta = ""
 
     for _, row in alerta.iterrows():
         ref_atual_alerta = str(row["Referencia"]).strip()
