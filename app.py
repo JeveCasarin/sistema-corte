@@ -61,7 +61,23 @@ for _, row in alerta.iterrows():
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
-    col4.write(int(row["Quantidade"]))
+    col4.markdown(
+        f"""
+        <div style='
+            font-size:20px;
+            font-weight:bold;
+            text-align:center;
+            background-color:#1f2937;
+            padding:4px 8px;
+            border-radius:6px;
+            width: fit-content;
+            margin:auto;
+        '>
+            {int(row["Quantidade"])}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     if col5.button("OC Realizada", key=f"buy_{row['id']}"):
         cursor.execute("""
@@ -140,7 +156,23 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
 
     qtd = get_quantidade(row)
-    col4.write(qtd)
+    col4.markdown(
+        f"""
+        <div style='
+            font-size:18px;
+            font-weight:bold;
+            text-align:center;
+            background-color:#1f2937;
+            padding:4px 8px;
+            border-radius:6px;
+            width: fit-content;
+            margin:auto;
+        '>
+            {qtd}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     if qtd <= 2:
         col5.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
