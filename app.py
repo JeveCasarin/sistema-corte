@@ -43,7 +43,7 @@ if not alerta.empty:
     col1.markdown("**Referencia**")
     col2.markdown("**CodCor**")
     col3.markdown("**Cor**")
-    col4.markdown("**Qtd**")
+    col4.markdown("<div style='text-align:center; font-weight:bold;'>Qtd</div>", unsafe_allow_html=True)
     col5.markdown("**Ação**")
 
 st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
