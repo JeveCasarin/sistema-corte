@@ -46,42 +46,42 @@ if not alerta.empty:
     col4.markdown("**Qtd**")
     col5.markdown("**Ação**")
 
-    st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
 st.divider()
-    ref_anterior_alerta = ""
+ref_anterior_alerta = ""
 
-    for _, row in alerta.iterrows():
-        ref_atual_alerta = str(row["Referencia"]).strip()
+for _, row in alerta.iterrows():
+    ref_atual_alerta = str(row["Referencia"]).strip()
 
-        if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
-            st.markdown("<hr style='margin: 8px 0; border: 2px solid #888;'>", unsafe_allow_html=True)
+    if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
+        st.markdown("<hr style='margin: 8px 0; border: 2px solid #888;'>", unsafe_allow_html=True)
 
-        col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1, 2])
+    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1, 2])
 
-        col1.write(row["Referencia"])
-        col2.write(row["CodCor"])
-        col3.write(row["Cor"])
-        col4.write(int(row["Quantidade"]))
+    col1.write(row["Referencia"])
+    col2.write(row["CodCor"])
+    col3.write(row["Cor"])
+    col4.write(int(row["Quantidade"]))
 
-        if col5.button("OC Realizada", key=f"buy_{row['id']}"):
-            cursor.execute("""
-                UPDATE estoque
-                SET CompraRealizada = 1
-                WHERE id = ?
-            """, (row["id"],))
-            conn.commit()
-            st.rerun()
-
-        ref_anterior_alerta = ref_atual_alerta
-
-    if st.button("✔️ Marcar todos como comprados"):
+    if col5.button("OC Realizada", key=f"buy_{row['id']}"):
         cursor.execute("""
             UPDATE estoque
             SET CompraRealizada = 1
-            WHERE Quantidade <= 2 AND CompraRealizada = 0
-        """)
+            WHERE id = ?
+        """, (row["id"],))
         conn.commit()
         st.rerun()
+
+    ref_anterior_alerta = ref_atual_alerta
+
+if st.button("✔️ Marcar todos como comprados"):
+    cursor.execute("""
+        UPDATE estoque
+        SET CompraRealizada = 1
+        WHERE Quantidade <= 2 AND CompraRealizada = 0
+    """)
+    conn.commit()
+    st.rerun()
 
 else:
     st.success("Estoque saudável 👍")
