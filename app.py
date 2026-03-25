@@ -47,14 +47,14 @@ if not alerta.empty:
     col5.markdown("**Ação**")
 
 st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
-st.divider()
+
 ref_anterior_alerta = ""
 
 for _, row in alerta.iterrows():
     ref_atual_alerta = str(row["Referencia"]).strip()
 
     if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
-        st.markdown("<hr style='margin: 8px 0; border: 2px solid #888;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
     col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1, 2])
 
