@@ -2,6 +2,28 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 
+st.markdown("""
+<style>
+/* diminui o campo inteiro */
+div[data-baseweb="input"] {
+    width: 60px !important;
+}
+
+/* diminui os botões + e - */
+button[data-baseweb="button"] {
+    padding: 2px 6px !important;
+    font-size: 12px !important;
+}
+
+/* diminui altura do input */
+input {
+    height: 26px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ================= CONEXÃO =================
 def conectar():
     return sqlite3.connect("estoque.db", check_same_thread=False)
