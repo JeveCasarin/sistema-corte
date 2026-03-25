@@ -61,6 +61,7 @@ for _, row in alerta.iterrows():
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
+    qtd = int(row["Quantidade"])
     col4.markdown(
         f"""
         <div style='
