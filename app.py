@@ -66,14 +66,16 @@ for _, row in alerta.iterrows():
         <div style='
             font-size:20px;
             font-weight:bold;
-            text-align:center;
+            display:flex;
+            align-items:center;
+            justify-content:center;
             background-color:#1f2937;
-            padding:4px 8px;
             border-radius:6px;
-            width: fit-content;
+            width:40px;
+            height:30px;
             margin:auto;
         '>
-            {int(row["Quantidade"])}
+            {qtd}
         </div>
         """,
         unsafe_allow_html=True
@@ -161,11 +163,13 @@ for _, row in df.iterrows():
         <div style='
             font-size:18px;
             font-weight:bold;
-            text-align:center;
+            display:flex;
+            align-items:center;
+            justify-content:center;
             background-color:#1f2937;
-            padding:4px 8px;
             border-radius:6px;
-            width: fit-content;
+            width:40px;
+            height:30px;
             margin:auto;
         '>
             {qtd}
