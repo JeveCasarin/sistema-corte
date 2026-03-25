@@ -4,23 +4,25 @@ import sqlite3
 
 st.markdown("""
 <style>
-/* diminui o campo inteiro */
+
+/* caixa do number_input */
 div[data-baseweb="input"] {
-    width: 60px !important;
+    width: 70px !important;
 }
 
-/* diminui os botões + e - */
-button[data-baseweb="button"] {
+/* campo interno */
+div[data-baseweb="input"] input {
+    height: 28px !important;
+    font-size: 13px !important;
+    text-align: center !important;
+}
+
+/* botões + e - */
+div[data-baseweb="input"] button {
     padding: 2px 6px !important;
     font-size: 12px !important;
 }
 
-/* diminui altura do input */
-input {
-    height: 26px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
