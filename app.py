@@ -139,7 +139,7 @@ def get_quantidade(row):
         return 0
 
 # Cabeçalhos da tabela
-col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 2, 4])
+col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 3, 4])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
@@ -158,7 +158,7 @@ for _, row in df.iterrows():
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 2, 4])
+    col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 3, 4])
 
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
