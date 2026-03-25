@@ -65,18 +65,24 @@ for _, row in alerta.iterrows():
     col4.markdown(
         f"""
         <div style='
-            font-size:20px;
-            font-weight:bold;
             display:flex;
-            align-items:center;
             justify-content:center;
-            background-color:#1f2937;
-            border-radius:6px;
-            width:40px;
-            height:30px;
-            margin:auto;
+            align-items:center;
+            width:100%;
         '>
-            {qtd}
+            <div style='
+                font-size:18px;
+                font-weight:bold;
+                background-color:#1f2937;
+                border-radius:6px;
+                width:40px;
+                height:30px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            '>
+                {int(row["Quantidade"])}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
