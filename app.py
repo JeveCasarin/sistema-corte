@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
+import os
 
 # ================= CONEXÃO =================
 def conectar():
@@ -8,6 +9,11 @@ def conectar():
 
 conn = conectar()
 cursor = conn.cursor()
+
+CAMINHO_IMAGENS = "imagens"
+
+if not os.path.exists(CAMINHO_IMAGENS):
+    os.makedirs(CAMINHO_IMAGENS)
 
 # ================= TABELA =================
 cursor.execute("""
@@ -22,7 +28,7 @@ CREATE TABLE IF NOT EXISTS estoque (
 """)
 conn.commit()
 
-st.markdown("<h1 style='text-align: center;'>Sistema de Corte</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
 
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
@@ -136,14 +142,17 @@ def get_quantidade(row):
     except:
         return 0
 
-# Cabeçalhos da tabela
-col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 3, 4])
+if "imagem_selecionada" not in st.session_state:
+    st.session_state.imagem_selecionada = None
+
+col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 3, 1, 3, 4, 2])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
 col4.markdown("**Qtd**")
 col5.markdown("**Status**")
 col6.markdown("**Atualizar**")
+col7.markdown("**Imagem**")
 
 st.markdown("<hr style='margin: 2px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
 
@@ -152,11 +161,10 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
-    # Linha divisória entre referências diferentes
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 3, 1, 3, 4])
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 3, 1, 3, 4, 2])
 
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
@@ -208,8 +216,37 @@ for _, row in df.iterrows():
         conn.commit()
         st.rerun()
 
+    caminho_img_jpg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpg")
+    caminho_img_png = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.png")
+    caminho_img_jpeg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpeg")
+
+    caminho_img = None
+    if os.path.exists(caminho_img_jpg):
+        caminho_img = caminho_img_jpg
+    elif os.path.exists(caminho_img_png):
+        caminho_img = caminho_img_png
+    elif os.path.exists(caminho_img_jpeg):
+        caminho_img = caminho_img_jpeg
+
+    if caminho_img:
+        if col7.button("👁 Ver", key=f"ver_img_{row['id']}"):
+            st.session_state.imagem_selecionada = {
+                "referencia": row["Referencia"],
+                "caminho": caminho_img
+            }
+    else:
+        col7.markdown("—")
+
     ref_anterior = ref_atual
 
+if st.session_state.imagem_selecionada:
+    st.divider()
+    st.markdown("### 🖼️ Visualização do Tecido")
+    st.image(
+        st.session_state.imagem_selecionada["caminho"],
+        caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
+        width=350
+    )
 # 🔥 Backup download
 import io
 df_backup = pd.read_sql("SELECT * FROM estoque", conn)
