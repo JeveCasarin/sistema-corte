@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS estoque (
 conn.commit()
 
 st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
-st.write("Arquivos na pasta imagens:", os.listdir("imagens"))
 
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
@@ -147,6 +146,25 @@ def get_quantidade(row):
 if "imagem_selecionada" not in st.session_state:
     st.session_state.imagem_selecionada = None
 
+# 🔥 CONTAINER FIXO (tipo modal)
+container_imagem = st.container()
+if st.session_state.imagem_selecionada:
+    with container_imagem:
+        st.markdown("### 🖼️ Visualização do Tecido")
+
+        colA, colB = st.columns([5,1])
+
+        colA.image(
+            st.session_state.imagem_selecionada["caminho"],
+            use_container_width=True
+        )
+
+        if colB.button("❌ Fechar"):
+            st.session_state.imagem_selecionada = None
+            st.rerun()
+
+        st.divider()
+
 # Cabeçalhos da tabela
 col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 col1.markdown("**Referencia**")
@@ -193,6 +211,7 @@ for _, row in df.iterrows():
                 "referencia": row["Referencia"],
                 "caminho": caminho_img
             }
+            st.rerun()
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
