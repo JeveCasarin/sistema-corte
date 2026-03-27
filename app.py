@@ -15,21 +15,6 @@ def conectar():
 conn = conectar()
 cursor = conn.cursor()
 
-# ================= TABELA =================
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS estoque (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    Referencia TEXT,
-    CodCor TEXT,
-    Cor TEXT,
-    Quantidade INTEGER,
-    CompraRealizada INTEGER
-)
-""")
-conn.commit()
-
-st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
-
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
@@ -64,28 +49,26 @@ if not alerta.empty:
     for _, row in alerta.iterrows():
         ref_atual_alerta = str(row["Referencia"]).strip()
 
-        # Linha divisória entre referências
         if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
             st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
         col1, col2, col3, col4, col5, col6 = st.columns([2.8, 2, 3, 2, 1, 2.5])
 
-        # REFERENCIA / CODCOR / COR
         col1.write(row["Referencia"])
         col2.write(row["CodCor"])
         col3.write(row["Cor"])
 
         # IMAGEM
         extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
+        caminho_img_alerta = None
 
-        caminho_img = None
         for ext in extensoes:
             caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
             if os.path.exists(caminho_teste):
-                caminho_img = caminho_teste
+                caminho_img_alerta = caminho_teste
                 break
 
-        if caminho_img:
+        if caminho_img_alerta:
             if col4.button("👁 Ver", key=f"ver_img_alerta_{row['id']}"):
                 if st.session_state.imagem_alerta_selecionada == row["id"]:
                     st.session_state.imagem_alerta_selecionada = None
@@ -96,36 +79,37 @@ if not alerta.empty:
             col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
         # QTD
-       qtd_alerta = int(row["Quantidade"])
-       cor_qtd = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
-        
-       col5.markdown(
-        f"""
-        <div style='
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            width:100%;
-        '>
+        qtd_alerta = int(row["Quantidade"])
+        cor_qtd_alerta = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
+
+        col5.markdown(
+            f"""
             <div style='
-                font-size:18px;
-                font-weight:bold;
-                color:white;
-                background-color:{cor_qtd};
-                border-radius:6px;
-                width:40px;
-                height:30px;
                 display:flex;
-                align-items:center;
                 justify-content:center;
-                margin:auto;
+                align-items:center;
+                width:100%;
             '>
-                {qtd_alerta}
+                <div style='
+                    font-size:18px;
+                    font-weight:bold;
+                    color:white;
+                    background-color:{cor_qtd_alerta};
+                    border-radius:6px;
+                    width:40px;
+                    height:30px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    margin:auto;
+                '>
+                    {qtd_alerta}
+                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            """,
+            unsafe_allow_html=True
+        )
+
         # AÇÃO
         if col6.button("OC Realizada", key=f"buy_{row['id']}"):
             cursor.execute("""
@@ -137,14 +121,14 @@ if not alerta.empty:
             st.rerun()
 
         # IMAGEM ABAIXO DA LINHA CLICADA
-        if st.session_state.imagem_alerta_selecionada == row["id"] and caminho_img:
+        if st.session_state.imagem_alerta_selecionada == row["id"] and caminho_img_alerta:
             st.markdown(
                 "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
                 unsafe_allow_html=True
             )
 
             st.image(
-                caminho_img,
+                caminho_img_alerta,
                 caption=f"Referência: {row['Referencia']}",
                 use_container_width=True
             )
@@ -181,7 +165,6 @@ if busca:
         df["Cor"].astype(str).str.contains(busca, case=False, na=False)
     ]
 
-# Função segura para pegar quantidade
 def get_quantidade(row):
     valor = row.get("Quantidade", 0)
     if pd.isna(valor):
@@ -191,11 +174,10 @@ def get_quantidade(row):
     except:
         return 0
 
-# Estado da imagem selecionada
 if "imagem_selecionada" not in st.session_state:
     st.session_state.imagem_selecionada = None
 
-# Cabeçalhos da tabela
+# Cabeçalhos
 col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
@@ -212,20 +194,19 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
-    # 🔥 LINHA DE DIVISÃO (tem que vir logo no começo)
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
-    # 🔥 DEPOIS cria as colunas
     col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 
-    # conteúdo da linha
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
+    # IMAGEM
     extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
     caminho_img = None
+
     for ext in extensoes:
         caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
         if os.path.exists(caminho_teste):
@@ -242,6 +223,7 @@ for _, row in df.iterrows():
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
+    # QTD
     qtd = get_quantidade(row)
 
     col5.markdown(
@@ -271,11 +253,13 @@ for _, row in df.iterrows():
         unsafe_allow_html=True
     )
 
+    # STATUS
     if qtd <= 2:
         col6.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
     else:
         col6.markdown("🟢 OK")
 
+    # ATUALIZAR
     sub1, sub2 = col7.columns([3, 1])
 
     nova_qtd = sub1.number_input(
@@ -296,8 +280,12 @@ for _, row in df.iterrows():
         conn.commit()
         st.rerun()
 
+    # IMAGEM ABAIXO DA LINHA CLICADA
     if st.session_state.imagem_selecionada == row["id"] and caminho_img:
-        st.markdown("<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>", unsafe_allow_html=True)
+        st.markdown(
+            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
+            unsafe_allow_html=True
+        )
 
         st.image(
             caminho_img,
@@ -307,7 +295,6 @@ for _, row in df.iterrows():
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🔥 ATUALIZA SEMPRE NO FINAL
     ref_anterior = ref_atual
         
 # 🔥 Backup download
