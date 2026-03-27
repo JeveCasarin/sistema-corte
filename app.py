@@ -163,11 +163,14 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
+    # 🔥 LINHA DE DIVISÃO (tem que vir logo no começo)
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
+    # 🔥 DEPOIS cria as colunas
     col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 
+    # conteúdo da linha
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
@@ -244,18 +247,18 @@ for _, row in df.iterrows():
         st.rerun()
 
     if st.session_state.imagem_selecionada == row["id"] and caminho_img:
-        st.markdown(
-            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-            unsafe_allow_html=True
-        )
-    
+        st.markdown("<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>", unsafe_allow_html=True)
+
         st.image(
             caminho_img,
             caption=f"Referência: {row['Referencia']}",
             use_container_width=True
         )
-    
+
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # 🔥 ATUALIZA SEMPRE NO FINAL
+    ref_anterior = ref_atual
         
 # 🔥 Backup download
 import io
