@@ -33,6 +33,10 @@ st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_htm
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
+st.write("APP INICIOU")
+st.write("BANCO CONECTADO")
+st.write("TABELA CRIADA")
+
 df_alerta = pd.read_sql("SELECT * FROM estoque", conn)
 
 alerta = df_alerta[
