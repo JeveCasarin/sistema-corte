@@ -111,7 +111,7 @@ if not alerta.empty:
                     font-size:18px;
                     font-weight:bold;
                     color:white;
-                    background-color:{cor_qtd};
+                    background-color:{cor_qtd if 'cor_qtd' in locals() else '#1f2937'};
                     border-radius:6px;
                     width:40px;
                     height:30px;
@@ -120,7 +120,7 @@ if not alerta.empty:
                     justify-content:center;
                     margin:auto;
                 '>
-                    {qtd_alerta}
+                    {qtd}
                 </div>
             </div>
             """,
@@ -255,7 +255,8 @@ for _, row in df.iterrows():
             <div style='
                 font-size:18px;
                 font-weight:bold;
-                background-color:#1f2937;
+                color:white;
+                background-color:{cor_qtd if 'cor_qtd' in locals() else '#1f2937'};
                 border-radius:6px;
                 width:40px;
                 height:30px;
