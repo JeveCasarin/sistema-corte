@@ -3,17 +3,17 @@ import pandas as pd
 import sqlite3
 import os
 
+CAMINHO_IMAGENS = "imagens"
+
+if not os.path.exists(CAMINHO_IMAGENS):
+    os.makedirs(CAMINHO_IMAGENS)
+
 # ================= CONEXÃO =================
 def conectar():
     return sqlite3.connect("estoque.db", check_same_thread=False)
 
 conn = conectar()
 cursor = conn.cursor()
-
-CAMINHO_IMAGENS = "imagens"
-
-if not os.path.exists(CAMINHO_IMAGENS):
-    os.makedirs(CAMINHO_IMAGENS)
 
 # ================= TABELA =================
 cursor.execute("""
@@ -142,17 +142,19 @@ def get_quantidade(row):
     except:
         return 0
 
+# Estado da imagem selecionada
 if "imagem_selecionada" not in st.session_state:
     st.session_state.imagem_selecionada = None
 
-col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 3, 1, 3, 4, 2])
+# Cabeçalhos da tabela
+col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 col1.markdown("**Referencia**")
 col2.markdown("**CodCor**")
 col3.markdown("**Cor**")
-col4.markdown("**Qtd**")
-col5.markdown("**Status**")
-col6.markdown("**Atualizar**")
-col7.markdown("**Imagem**")
+col4.markdown("**Imagem**")
+col5.markdown("<div style='text-align:center; font-weight:bold;'>Qtd</div>", unsafe_allow_html=True)
+col6.markdown("**Status**")
+col7.markdown("**Atualizar**")
 
 st.markdown("<hr style='margin: 2px 0; border: 1px solid #888;'>", unsafe_allow_html=True)
 
@@ -161,42 +163,76 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
+    # Linha divisória entre referências diferentes
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 2, 3, 1, 3, 4, 2])
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 
+    # REFERENCIA / CODCOR / COR
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
+    # IMAGEM
+    caminho_img_jpg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpg")
+    caminho_img_png = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.png")
+    caminho_img_jpeg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpeg")
+
+    caminho_img = None
+    if os.path.exists(caminho_img_jpg):
+        caminho_img = caminho_img_jpg
+    elif os.path.exists(caminho_img_png):
+        caminho_img = caminho_img_png
+    elif os.path.exists(caminho_img_jpeg):
+        caminho_img = caminho_img_jpeg
+
+    if caminho_img:
+        if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
+            st.session_state.imagem_selecionada = {
+                "referencia": row["Referencia"],
+                "caminho": caminho_img
+            }
+    else:
+        col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
+
+    # QTD
     qtd = get_quantidade(row)
-    col4.markdown(
+    col5.markdown(
         f"""
         <div style='
-            font-size:18px;
-            font-weight:bold;
             display:flex;
-            align-items:center;
             justify-content:center;
-            background-color:#1f2937;
-            border-radius:6px;
-            width:40px;
-            height:30px;
-            margin:auto;
+            align-items:center;
+            width:100%;
         '>
-            {qtd}
+            <div style='
+                font-size:18px;
+                font-weight:bold;
+                background-color:#1f2937;
+                border-radius:6px;
+                width:40px;
+                height:30px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                margin:auto;
+            '>
+                {qtd}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
+    # STATUS
     if qtd <= 2:
-        col5.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
+        col6.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
     else:
-        col5.markdown("🟢 OK")
+        col6.markdown("🟢 OK")
 
-    sub1, sub2 = col6.columns([3, 1])
+    # ATUALIZAR
+    sub1, sub2 = col7.columns([3, 1])
 
     nova_qtd = sub1.number_input(
         "",
@@ -216,29 +252,9 @@ for _, row in df.iterrows():
         conn.commit()
         st.rerun()
 
-    caminho_img_jpg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpg")
-    caminho_img_png = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.png")
-    caminho_img_jpeg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpeg")
-
-    caminho_img = None
-    if os.path.exists(caminho_img_jpg):
-        caminho_img = caminho_img_jpg
-    elif os.path.exists(caminho_img_png):
-        caminho_img = caminho_img_png
-    elif os.path.exists(caminho_img_jpeg):
-        caminho_img = caminho_img_jpeg
-
-    if caminho_img:
-        if col7.button("👁 Ver", key=f"ver_img_{row['id']}"):
-            st.session_state.imagem_selecionada = {
-                "referencia": row["Referencia"],
-                "caminho": caminho_img
-            }
-    else:
-        col7.markdown("—")
-
     ref_anterior = ref_atual
 
+# VISUALIZAÇÃO DA IMAGEM
 if st.session_state.imagem_selecionada:
     st.divider()
     st.markdown("### 🖼️ Visualização do Tecido")
