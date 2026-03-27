@@ -179,6 +179,9 @@ st.markdown("<hr style='margin: 2px 0; border: 1px solid #888;'>", unsafe_allow_
 
 ref_anterior = ""
 
+if "imagem_selecionada" not in st.session_state:
+    st.session_state.imagem_selecionada = None
+
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
@@ -207,11 +210,7 @@ for _, row in df.iterrows():
 # DEBUG (TEMPORÁRIO)
     if caminho_img:
         if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
-            st.session_state.imagem_selecionada = {
-                "referencia": row["Referencia"],
-                "caminho": caminho_img
-            }
-            st.rerun()
+            st.session_state.imagem_selecionada = row["id"] if st.session_state.imagem_selecionada != row["id"] else None
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
@@ -273,15 +272,27 @@ for _, row in df.iterrows():
 
     ref_anterior = ref_atual
 
-# VISUALIZAÇÃO DA IMAGEM
-if st.session_state.imagem_selecionada:
-    st.divider()
-    st.markdown("### 🖼️ Visualização do Tecido")
-    st.image(
-        st.session_state.imagem_selecionada["caminho"],
-        caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
-        width=350
-    )
+    if st.session_state.imagem_selecionada == row["id"] and caminho_img:
+        st.markdown(
+            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
+            unsafe_allow_html=True
+        )
+        st.image(
+            caminho_img,
+            caption=f"Referência: {row['Referencia']}",
+            width=350
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # VISUALIZAÇÃO DA IMAGEM
+    if st.session_state.imagem_selecionada:
+        st.divider()
+        st.markdown("### 🖼️ Visualização do Tecido")
+        st.image(
+            st.session_state.imagem_selecionada["caminho"],
+            caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
+            width=350
+        )
 # 🔥 Backup download
 import io
 df_backup = pd.read_sql("SELECT * FROM estoque", conn)
