@@ -190,14 +190,18 @@ for _, row in df.iterrows():
                 st.session_state.imagem_selecionada is not None
                 and st.session_state.imagem_selecionada["id"] == row["id"]
             ):
-                st.session_state.imagem_selecionada = None
-            else:
-                st.session_state.imagem_selecionada = {
-                    "id": row["id"],
-                    "referencia": row["Referencia"],
-                    "caminho": caminho_img
-                }
-            st.rerun()
+                st.markdown(
+                    "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
+                    unsafe_allow_html=True
+                )
+            
+                st.image(
+                    st.session_state.imagem_selecionada["caminho"],
+                    caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
+                    use_container_width=True
+                )
+            
+                st.markdown("</div>", unsafe_allow_html=True)
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
