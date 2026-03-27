@@ -163,20 +163,16 @@ ref_anterior = ""
 for _, row in df.iterrows():
     ref_atual = str(row["Referencia"]).strip()
 
-    # Linha divisória entre referências diferentes
     if ref_anterior != "" and ref_anterior != ref_atual:
         st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
 
     col1, col2, col3, col4, col5, col6, col7 = st.columns([2.8, 2, 3, 2, 1, 2.5, 4])
 
-    # REFERENCIA / CODCOR / COR
     col1.write(row["Referencia"])
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
-        # IMAGEM
     extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
-
     caminho_img = None
     for ext in extensoes:
         caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
@@ -186,32 +182,14 @@ for _, row in df.iterrows():
 
     if caminho_img:
         if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
-            # se clicou na mesma, fecha
             if st.session_state.imagem_selecionada == row["id"]:
                 st.session_state.imagem_selecionada = None
             else:
-                # se clicou em outra, troca
                 st.session_state.imagem_selecionada = row["id"]
             st.rerun()
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
-        
-            # IMAGEM ABAIXO DA LINHA CLICADA
-    if st.session_state.imagem_selecionada == row["id"] and caminho_img:
-        st.markdown(
-            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-            unsafe_allow_html=True
-        )
 
-        st.image(
-            caminho_img,
-            caption=f"Referência: {row['Referencia']}",
-            use_container_width=True
-        )
-
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-    # QTD
     qtd = get_quantidade(row)
     col5.markdown(
         f"""
@@ -240,13 +218,11 @@ for _, row in df.iterrows():
         unsafe_allow_html=True
     )
 
-    # STATUS
     if qtd <= 2:
         col6.markdown("🟡 OC REALIZADA" if row["CompraRealizada"] else "🔴 FAZER OC")
     else:
         col6.markdown("🟢 OK")
 
-    # ATUALIZAR
     sub1, sub2 = col7.columns([3, 1])
 
     nova_qtd = sub1.number_input(
@@ -267,24 +243,21 @@ for _, row in df.iterrows():
         conn.commit()
         st.rerun()
 
-    # IMAGEM ABAIXO DA LINHA CLICADA
-    if (
-        st.session_state.imagem_selecionada is not None
-        and st.session_state.imagem_selecionada["id"] == row["id"]
-    ):
+    if st.session_state.imagem_selecionada == row["id"] and caminho_img:
         st.markdown(
             "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
             unsafe_allow_html=True
         )
+
         st.image(
-            st.session_state.imagem_selecionada["caminho"],
-            caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
-            width=350
+            caminho_img,
+            caption=f"Referência: {row['Referencia']}",
+            use_container_width=True
         )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
     ref_anterior = ref_atual
-
     if st.session_state.imagem_selecionada == row["id"] and caminho_img:
         st.markdown(
             "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
