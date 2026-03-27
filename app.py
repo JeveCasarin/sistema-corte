@@ -196,21 +196,24 @@ for _, row in df.iterrows():
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
-    # IMAGEM (VERSÃO CORRETA E SEGURA)
+    # IMAGEM
     extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
 
     caminho_img = None
-    
     for ext in extensoes:
         caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
         if os.path.exists(caminho_teste):
             caminho_img = caminho_teste
             break
 
-# DEBUG (TEMPORÁRIO)
     if caminho_img:
         if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
-            st.session_state.imagem_selecionada = row["id"] if st.session_state.imagem_selecionada != row["id"] else None
+            st.session_state.imagem_selecionada = {
+                "id": row["id"],
+                "referencia": row["Referencia"],
+                "caminho": caminho_img
+            }
+            st.rerun()
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
