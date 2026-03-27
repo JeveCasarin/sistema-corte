@@ -174,7 +174,7 @@ for _, row in df.iterrows():
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
-    # IMAGEM
+        # IMAGEM
     extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
 
     caminho_img = None
@@ -186,25 +186,31 @@ for _, row in df.iterrows():
 
     if caminho_img:
         if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
-            if (
-                st.session_state.imagem_selecionada is not None
-                and st.session_state.imagem_selecionada["id"] == row["id"]
-            ):
-                st.markdown(
-                    "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-                    unsafe_allow_html=True
-                )
-            
-                st.image(
-                    st.session_state.imagem_selecionada["caminho"],
-                    caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
-                    use_container_width=True
-                )
-            
-                st.markdown("</div>", unsafe_allow_html=True)
+            # se clicou na mesma, fecha
+            if st.session_state.imagem_selecionada == row["id"]:
+                st.session_state.imagem_selecionada = None
+            else:
+                # se clicou em outra, troca
+                st.session_state.imagem_selecionada = row["id"]
+            st.rerun()
     else:
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
+        
+            # IMAGEM ABAIXO DA LINHA CLICADA
+    if st.session_state.imagem_selecionada == row["id"] and caminho_img:
+        st.markdown(
+            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
+            unsafe_allow_html=True
+        )
 
+        st.image(
+            caminho_img,
+            caption=f"Referência: {row['Referencia']}",
+            use_container_width=True
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        
     # QTD
     qtd = get_quantidade(row)
     col5.markdown(
