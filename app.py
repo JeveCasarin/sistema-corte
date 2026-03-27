@@ -284,15 +284,6 @@ for _, row in df.iterrows():
         )
         st.markdown("</div>", unsafe_allow_html=True)
     
-    # VISUALIZAÇÃO DA IMAGEM
-    if st.session_state.imagem_selecionada:
-        st.divider()
-        st.markdown("### 🖼️ Visualização do Tecido")
-        st.image(
-            st.session_state.imagem_selecionada["caminho"],
-            caption=f"Referência: {st.session_state.imagem_selecionada['referencia']}",
-            width=350
-        )
 # 🔥 Backup download
 import io
 df_backup = pd.read_sql("SELECT * FROM estoque", conn)
