@@ -20,21 +20,21 @@ CAMINHO_IMAGENS = os.path.join(BASE_DIR, "imagens")
 if not os.path.exists(CAMINHO_IMAGENS):
     os.makedirs(CAMINHO_IMAGENS)
 
-# ================= CSS MOBILE / DESKTOP =================
+# ================= CSS =================
 st.markdown("""
 <style>
-/* ===== CONTAINER ===== */
+/* ===== CONTAINER GERAL ===== */
 .block-container{
     padding-top: 1rem;
     padding-bottom: 2rem;
     padding-left: 0.8rem;
     padding-right: 0.8rem;
-    max-width: 1200px;
+    max-width: 1250px;
 }
 
 /* ===== INPUTS ===== */
 input, textarea {
-    font-size: 16px !important;
+    font-size: 16px !important; /* evita zoom no iPhone/Safari */
 }
 
 /* ===== BOTÕES ===== */
@@ -46,7 +46,7 @@ input, textarea {
     font-weight: 600;
 }
 
-/* ===== CARDS ===== */
+/* ===== CARDS MOBILE ===== */
 .npc-card {
     background: #111827;
     border: 1px solid #374151;
@@ -115,10 +115,31 @@ input, textarea {
     border-top: 1px solid #374151;
 }
 
+/* ===== CONTROLE PC / MOBILE ===== */
+.st-key-mobile_alerta,
+.st-key-mobile_lista {
+    display: none;
+}
+
+.st-key-desktop_alerta,
+.st-key-desktop_lista {
+    display: block;
+}
+
 @media (max-width: 768px) {
     .block-container{
         padding-left: 0.55rem;
         padding-right: 0.55rem;
+    }
+
+    .st-key-desktop_alerta,
+    .st-key-desktop_lista {
+        display: none !important;
+    }
+
+    .st-key-mobile_alerta,
+    .st-key-mobile_lista {
+        display: block !important;
     }
 
     .npc-grid {
@@ -140,7 +161,7 @@ def conectar():
 conn = conectar()
 cursor = conn.cursor()
 
-# ================= CRIAR TABELA =================
+# ================= TABELA =================
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS estoque (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -176,13 +197,14 @@ def get_compra_realizada(row):
         return 0
 
 def get_caminho_imagem(referencia):
-    extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG", "webp", "WEBP"]
     referencia = normalizar_texto(referencia)
+    extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG", "webp", "WEBP"]
 
     for ext in extensoes:
         caminho = os.path.join(CAMINHO_IMAGENS, f"{referencia}.{ext}")
         if os.path.exists(caminho):
             return caminho
+
     return None
 
 def badge_qtd(qtd):
@@ -210,7 +232,7 @@ def carregar_dataframe():
         df["CompraRealizada"] = pd.to_numeric(df["CompraRealizada"], errors="coerce").fillna(0).astype(int)
     return df
 
-# ================= SESSION STATE =================
+# ================= SESSION =================
 if "imagem_alerta_selecionada" not in st.session_state:
     st.session_state.imagem_alerta_selecionada = None
 
@@ -232,78 +254,130 @@ alerta = df_alerta[
 
 if not alerta.empty:
     alerta = alerta.sort_values(by=["Referencia", "CodCor"])
-
     st.warning("⚠️ Fazer pedido desses itens AGORA")
 
-    ref_anterior_alerta = ""
+    # ===== DESKTOP =====
+    with st.container(key="desktop_alerta"):
+        h1, h2, h3, h4, h5, h6 = st.columns([2, 2, 2, 1, 2, 2])
+        h1.markdown("**Referência**")
+        h2.markdown("**CodCor**")
+        h3.markdown("**Cor**")
+        h4.markdown("**Qtd**")
+        h5.markdown("**Imagem**")
+        h6.markdown("**Ação**")
 
-    for _, row in alerta.iterrows():
-        ref_atual_alerta = normalizar_texto(row["Referencia"])
+        ref_anterior_alerta = ""
 
-        if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
-            st.markdown("<hr class='npc-sep'>", unsafe_allow_html=True)
+        for _, row in alerta.iterrows():
+            ref_atual_alerta = normalizar_texto(row["Referencia"])
 
-        qtd_alerta = get_quantidade(row)
-        caminho_img_alerta = get_caminho_imagem(row["Referencia"])
+            if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
+                st.divider()
 
-        st.markdown(f"""
-        <div class="npc-card-alerta">
-            <div class="npc-title">Referência: {normalizar_texto(row['Referencia'])}</div>
-            <div class="npc-grid">
-                <div class="npc-item">
-                    <div class="npc-label">Código da Cor</div>
-                    <div class="npc-value">{normalizar_texto(row['CodCor'])}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Cor</div>
-                    <div class="npc-value">{normalizar_texto(row['Cor'])}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Quantidade</div>
-                    <div class="npc-value">{badge_qtd(qtd_alerta)}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Status</div>
-                    <div class="npc-value">🔴 FAZER OC</div>
+            qtd_alerta = get_quantidade(row)
+            caminho_img_alerta = get_caminho_imagem(row["Referencia"])
+
+            c1, c2, c3, c4, c5, c6 = st.columns([2, 2, 2, 1, 2, 2])
+
+            c1.write(normalizar_texto(row["Referencia"]))
+            c2.write(normalizar_texto(row["CodCor"]))
+            c3.write(normalizar_texto(row["Cor"]))
+            c4.markdown(badge_qtd(qtd_alerta), unsafe_allow_html=True)
+
+            if caminho_img_alerta:
+                if c5.button("👁 Ver", key=f"ver_img_alerta_desktop_{row['id']}", use_container_width=True):
+                    if st.session_state.imagem_alerta_selecionada == f"alerta_{row['id']}":
+                        st.session_state.imagem_alerta_selecionada = None
+                    else:
+                        st.session_state.imagem_alerta_selecionada = f"alerta_{row['id']}"
+                    st.rerun()
+            else:
+                c5.write("-")
+
+            if c6.button("✔ OC", key=f"buy_desktop_{row['id']}", use_container_width=True):
+                cursor.execute("""
+                    UPDATE estoque
+                    SET CompraRealizada = 1
+                    WHERE id = ?
+                """, (int(row["id"]),))
+                conn.commit()
+                st.rerun()
+
+            if st.session_state.imagem_alerta_selecionada == f"alerta_{row['id']}" and caminho_img_alerta:
+                st.image(
+                    caminho_img_alerta,
+                    caption=f"Referência: {normalizar_texto(row['Referencia'])}",
+                    use_container_width=True
+                )
+
+            ref_anterior_alerta = ref_atual_alerta
+
+    # ===== MOBILE =====
+    with st.container(key="mobile_alerta"):
+        ref_anterior_alerta = ""
+
+        for _, row in alerta.iterrows():
+            ref_atual_alerta = normalizar_texto(row["Referencia"])
+
+            if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
+                st.markdown("<hr class='npc-sep'>", unsafe_allow_html=True)
+
+            qtd_alerta = get_quantidade(row)
+            caminho_img_alerta = get_caminho_imagem(row["Referencia"])
+
+            st.markdown(f"""
+            <div class="npc-card-alerta">
+                <div class="npc-title">Referência: {normalizar_texto(row['Referencia'])}</div>
+                <div class="npc-grid">
+                    <div class="npc-item">
+                        <div class="npc-label">Código da Cor</div>
+                        <div class="npc-value">{normalizar_texto(row['CodCor'])}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Cor</div>
+                        <div class="npc-value">{normalizar_texto(row['Cor'])}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Quantidade</div>
+                        <div class="npc-value">{badge_qtd(qtd_alerta)}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Status</div>
+                        <div class="npc-value">🔴 FAZER OC</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
-        ac1, ac2 = st.columns(2)
+            ac1, ac2 = st.columns(2)
 
-        if caminho_img_alerta:
-            if ac1.button("👁 Ver imagem", key=f"ver_img_alerta_{row['id']}", use_container_width=True):
-                if st.session_state.imagem_alerta_selecionada == row["id"]:
-                    st.session_state.imagem_alerta_selecionada = None
-                else:
-                    st.session_state.imagem_alerta_selecionada = row["id"]
+            if caminho_img_alerta:
+                if ac1.button("👁 Ver imagem", key=f"ver_img_alerta_mobile_{row['id']}", use_container_width=True):
+                    if st.session_state.imagem_alerta_selecionada == f"alerta_{row['id']}":
+                        st.session_state.imagem_alerta_selecionada = None
+                    else:
+                        st.session_state.imagem_alerta_selecionada = f"alerta_{row['id']}"
+                    st.rerun()
+            else:
+                ac1.write("")
+
+            if ac2.button("✔️ OC Realizada", key=f"buy_mobile_{row['id']}", use_container_width=True):
+                cursor.execute("""
+                    UPDATE estoque
+                    SET CompraRealizada = 1
+                    WHERE id = ?
+                """, (int(row["id"]),))
+                conn.commit()
                 st.rerun()
-        else:
-            ac1.markdown("")
 
-        if ac2.button("✔️ OC Realizada", key=f"buy_{row['id']}", use_container_width=True):
-            cursor.execute("""
-                UPDATE estoque
-                SET CompraRealizada = 1
-                WHERE id = ?
-            """, (int(row["id"]),))
-            conn.commit()
-            st.rerun()
+            if st.session_state.imagem_alerta_selecionada == f"alerta_{row['id']}" and caminho_img_alerta:
+                st.image(
+                    caminho_img_alerta,
+                    caption=f"Referência: {normalizar_texto(row['Referencia'])}",
+                    use_container_width=True
+                )
 
-        if st.session_state.imagem_alerta_selecionada == row["id"] and caminho_img_alerta:
-            st.markdown(
-                "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-                unsafe_allow_html=True
-            )
-            st.image(
-                caminho_img_alerta,
-                caption=f"Referência: {normalizar_texto(row['Referencia'])}",
-                use_container_width=True
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        ref_anterior_alerta = ref_atual_alerta
+            ref_anterior_alerta = ref_atual_alerta
 
     if st.button("✔️ Marcar todos como comprados", key="buy_all_alerta", use_container_width=True):
         cursor.execute("""
@@ -337,85 +411,152 @@ if busca:
 if df.empty:
     st.info("Nenhum item encontrado.")
 else:
-    ref_anterior = ""
+    # ===== DESKTOP =====
+    with st.container(key="desktop_lista"):
+        h1, h2, h3, h4, h5, h6, h7, h8 = st.columns([2, 2, 2, 1, 2, 2, 1.2, 1.5])
+        h1.markdown("**Referência**")
+        h2.markdown("**CodCor**")
+        h3.markdown("**Cor**")
+        h4.markdown("**Qtd**")
+        h5.markdown("**Status**")
+        h6.markdown("**Imagem**")
+        h7.markdown("**Nova Qtd**")
+        h8.markdown("**Atualizar**")
 
-    for _, row in df.iterrows():
-        ref_atual = normalizar_texto(row["Referencia"])
+        ref_anterior = ""
 
-        if ref_anterior != "" and ref_anterior != ref_atual:
-            st.markdown("<hr class='npc-sep'>", unsafe_allow_html=True)
+        for _, row in df.iterrows():
+            ref_atual = normalizar_texto(row["Referencia"])
 
-        qtd = get_quantidade(row)
-        compra_realizada = get_compra_realizada(row)
-        caminho_img = get_caminho_imagem(row["Referencia"])
-        status = status_texto(qtd, compra_realizada)
+            if ref_anterior != "" and ref_anterior != ref_atual:
+                st.divider()
 
-        st.markdown(f"""
-        <div class="npc-card">
-            <div class="npc-title">Referência: {normalizar_texto(row['Referencia'])}</div>
-            <div class="npc-grid">
-                <div class="npc-item">
-                    <div class="npc-label">Código da Cor</div>
-                    <div class="npc-value">{normalizar_texto(row['CodCor'])}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Cor</div>
-                    <div class="npc-value">{normalizar_texto(row['Cor'])}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Quantidade Atual</div>
-                    <div class="npc-value">{badge_qtd(qtd)}</div>
-                </div>
-                <div class="npc-item">
-                    <div class="npc-label">Status</div>
-                    <div class="npc-value">{status}</div>
+            qtd = get_quantidade(row)
+            compra_realizada = get_compra_realizada(row)
+            caminho_img = get_caminho_imagem(row["Referencia"])
+            status = status_texto(qtd, compra_realizada)
+
+            c1, c2, c3, c4, c5, c6, c7, c8 = st.columns([2, 2, 2, 1, 2, 2, 1.2, 1.5])
+
+            c1.write(normalizar_texto(row["Referencia"]))
+            c2.write(normalizar_texto(row["CodCor"]))
+            c3.write(normalizar_texto(row["Cor"]))
+            c4.markdown(badge_qtd(qtd), unsafe_allow_html=True)
+            c5.write(status)
+
+            if caminho_img:
+                if c6.button("👁 Ver", key=f"ver_img_desktop_{row['id']}", use_container_width=True):
+                    if st.session_state.imagem_selecionada == f"lista_{row['id']}":
+                        st.session_state.imagem_selecionada = None
+                    else:
+                        st.session_state.imagem_selecionada = f"lista_{row['id']}"
+                    st.rerun()
+            else:
+                c6.write("-")
+
+            nova_qtd_desktop = c7.number_input(
+                "Nova quantidade",
+                min_value=0,
+                max_value=999,
+                value=qtd,
+                key=f"qtd_desktop_{row['id']}",
+                label_visibility="collapsed"
+            )
+
+            if c8.button("✔ Atualizar", key=f"save_desktop_{row['id']}", use_container_width=True):
+                cursor.execute("""
+                    UPDATE estoque
+                    SET Quantidade = ?, CompraRealizada = 0
+                    WHERE id = ?
+                """, (int(nova_qtd_desktop), int(row["id"])))
+                conn.commit()
+                st.rerun()
+
+            if st.session_state.imagem_selecionada == f"lista_{row['id']}" and caminho_img:
+                st.image(
+                    caminho_img,
+                    caption=f"Referência: {normalizar_texto(row['Referencia'])}",
+                    use_container_width=True
+                )
+
+            ref_anterior = ref_atual
+
+    # ===== MOBILE =====
+    with st.container(key="mobile_lista"):
+        ref_anterior = ""
+
+        for _, row in df.iterrows():
+            ref_atual = normalizar_texto(row["Referencia"])
+
+            if ref_anterior != "" and ref_anterior != ref_atual:
+                st.markdown("<hr class='npc-sep'>", unsafe_allow_html=True)
+
+            qtd = get_quantidade(row)
+            compra_realizada = get_compra_realizada(row)
+            caminho_img = get_caminho_imagem(row["Referencia"])
+            status = status_texto(qtd, compra_realizada)
+
+            st.markdown(f"""
+            <div class="npc-card">
+                <div class="npc-title">Referência: {normalizar_texto(row['Referencia'])}</div>
+                <div class="npc-grid">
+                    <div class="npc-item">
+                        <div class="npc-label">Código da Cor</div>
+                        <div class="npc-value">{normalizar_texto(row['CodCor'])}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Cor</div>
+                        <div class="npc-value">{normalizar_texto(row['Cor'])}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Quantidade Atual</div>
+                        <div class="npc-value">{badge_qtd(qtd)}</div>
+                    </div>
+                    <div class="npc-item">
+                        <div class="npc-label">Status</div>
+                        <div class="npc-value">{status}</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
-        b1, b2 = st.columns(2)
+            mc1, mc2 = st.columns(2)
 
-        if caminho_img:
-            if b1.button("👁 Ver imagem", key=f"ver_img_{row['id']}", use_container_width=True):
-                if st.session_state.imagem_selecionada == row["id"]:
-                    st.session_state.imagem_selecionada = None
-                else:
-                    st.session_state.imagem_selecionada = row["id"]
+            if caminho_img:
+                if mc1.button("👁 Ver imagem", key=f"ver_img_mobile_{row['id']}", use_container_width=True):
+                    if st.session_state.imagem_selecionada == f"lista_{row['id']}":
+                        st.session_state.imagem_selecionada = None
+                    else:
+                        st.session_state.imagem_selecionada = f"lista_{row['id']}"
+                    st.rerun()
+            else:
+                mc1.write("")
+
+            nova_qtd_mobile = mc2.number_input(
+                "Nova quantidade",
+                min_value=0,
+                max_value=999,
+                value=qtd,
+                key=f"qtd_mobile_{row['id']}"
+            )
+
+            if st.button("✔ Atualizar quantidade", key=f"save_mobile_{row['id']}", use_container_width=True):
+                cursor.execute("""
+                    UPDATE estoque
+                    SET Quantidade = ?, CompraRealizada = 0
+                    WHERE id = ?
+                """, (int(nova_qtd_mobile), int(row["id"])))
+                conn.commit()
                 st.rerun()
-        else:
-            b1.markdown("")
 
-        nova_qtd = b2.number_input(
-            "Nova quantidade",
-            min_value=0,
-            max_value=999,
-            value=qtd,
-            key=f"qtd_{row['id']}"
-        )
+            if st.session_state.imagem_selecionada == f"lista_{row['id']}" and caminho_img:
+                st.image(
+                    caminho_img,
+                    caption=f"Referência: {normalizar_texto(row['Referencia'])}",
+                    use_container_width=True
+                )
 
-        if st.button("✔ Atualizar quantidade", key=f"save_{row['id']}", use_container_width=True):
-            cursor.execute("""
-                UPDATE estoque
-                SET Quantidade = ?, CompraRealizada = 0
-                WHERE id = ?
-            """, (int(nova_qtd), int(row["id"])))
-            conn.commit()
-            st.rerun()
-
-        if st.session_state.imagem_selecionada == row["id"] and caminho_img:
-            st.markdown(
-                "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-                unsafe_allow_html=True
-            )
-            st.image(
-                caminho_img,
-                caption=f"Referência: {normalizar_texto(row['Referencia'])}",
-                use_container_width=True
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        ref_anterior = ref_atual
+            ref_anterior = ref_atual
 
 st.divider()
 
@@ -574,4 +715,5 @@ if st.button("Excluir", use_container_width=True):
             st.success("Item excluído com sucesso!")
         else:
             st.warning("Nenhum item encontrado com essa referência e código.")
+
         st.rerun()
