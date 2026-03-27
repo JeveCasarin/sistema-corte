@@ -174,19 +174,18 @@ for _, row in df.iterrows():
     col2.write(row["CodCor"])
     col3.write(row["Cor"])
 
-    # IMAGEM
-    caminho_img_jpg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpg")
-    caminho_img_png = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.png")
-    caminho_img_jpeg = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.jpeg")
-
+    # IMAGEM (VERSÃO CORRETA E SEGURA)
+    extensoes = ["jpg", "jpeg", "png"]
+    
     caminho_img = None
-    if os.path.exists(caminho_img_jpg):
-        caminho_img = caminho_img_jpg
-    elif os.path.exists(caminho_img_png):
-        caminho_img = caminho_img_png
-    elif os.path.exists(caminho_img_jpeg):
-        caminho_img = caminho_img_jpeg
+    
+    for ext in extensoes:
+        caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
+        if os.path.exists(caminho_teste):
+            caminho_img = caminho_teste
+            break
 
+# DEBUG (TEMPORÁRIO)
     if caminho_img:
         if col4.button("👁 Ver", key=f"ver_img_{row['id']}"):
             st.session_state.imagem_selecionada = {
