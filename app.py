@@ -42,33 +42,64 @@ alerta = df_alerta[
 
 alerta = alerta.sort_values(by=["Referencia", "CodCor"])
 
+if "imagem_alerta_selecionada" not in st.session_state:
+    st.session_state.imagem_alerta_selecionada = None
+
 if not alerta.empty:
     st.warning("⚠️ Fazer pedido desses itens AGORA")
 
-    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1, 2])
+    # Cabeçalhos
+    col1, col2, col3, col4, col5, col6 = st.columns([2.8, 2, 3, 2, 1, 2.5])
     col1.markdown("**Referencia**")
     col2.markdown("**CodCor**")
     col3.markdown("**Cor**")
-    col4.markdown("<div style='text-align:center; font-weight:bold;'>Qtd</div>", unsafe_allow_html=True)
-    col5.markdown("**Ação**")
+    col4.markdown("**Imagem**")
+    col5.markdown("<div style='text-align:center; font-weight:bold;'>Qtd</div>", unsafe_allow_html=True)
+    col6.markdown("**Ação**")
 
     st.markdown("<hr style='margin: 6px 0; border: 1px solid #666;'>", unsafe_allow_html=True)
-    
+
     ref_anterior_alerta = ""
 
     for _, row in alerta.iterrows():
         ref_atual_alerta = str(row["Referencia"]).strip()
-    
+
+        # Linha divisória entre referências
         if ref_anterior_alerta != "" and ref_anterior_alerta != ref_atual_alerta:
             st.markdown("<hr style='margin: 2px 0; border: 1px solid #555;'>", unsafe_allow_html=True)
-    
-        col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 1, 2])
-    
+
+        col1, col2, col3, col4, col5, col6 = st.columns([2.8, 2, 3, 2, 1, 2.5])
+
+        # REFERENCIA / CODCOR / COR
         col1.write(row["Referencia"])
         col2.write(row["CodCor"])
         col3.write(row["Cor"])
-        qtd = int(row["Quantidade"])
-        col4.markdown(
+
+        # IMAGEM
+        extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
+
+        caminho_img = None
+        for ext in extensoes:
+            caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{row['Referencia']}.{ext}")
+            if os.path.exists(caminho_teste):
+                caminho_img = caminho_teste
+                break
+
+        if caminho_img:
+            if col4.button("👁 Ver", key=f"ver_img_alerta_{row['id']}"):
+                if st.session_state.imagem_alerta_selecionada == row["id"]:
+                    st.session_state.imagem_alerta_selecionada = None
+                else:
+                    st.session_state.imagem_alerta_selecionada = row["id"]
+                st.rerun()
+        else:
+            col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
+
+        # QTD
+        qtd_alerta = int(row["Quantidade"])
+        cor_qtd = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
+
+        col5.markdown(
             f"""
             <div style='
                 display:flex;
@@ -79,22 +110,25 @@ if not alerta.empty:
                 <div style='
                     font-size:18px;
                     font-weight:bold;
-                    background-color:#1f2937;
+                    color:white;
+                    background-color:{cor_qtd};
                     border-radius:6px;
                     width:40px;
                     height:30px;
                     display:flex;
                     align-items:center;
                     justify-content:center;
+                    margin:auto;
                 '>
-                    {int(row["Quantidade"])}
+                    {qtd_alerta}
                 </div>
             </div>
             """,
             unsafe_allow_html=True
         )
-    
-        if col5.button("OC Realizada", key=f"buy_{row['id']}"):
+
+        # AÇÃO
+        if col6.button("OC Realizada", key=f"buy_{row['id']}"):
             cursor.execute("""
                 UPDATE estoque
                 SET CompraRealizada = 1
@@ -102,10 +136,25 @@ if not alerta.empty:
             """, (row["id"],))
             conn.commit()
             st.rerun()
-    
+
+        # IMAGEM ABAIXO DA LINHA CLICADA
+        if st.session_state.imagem_alerta_selecionada == row["id"] and caminho_img:
+            st.markdown(
+                "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
+                unsafe_allow_html=True
+            )
+
+            st.image(
+                caminho_img,
+                caption=f"Referência: {row['Referencia']}",
+                use_container_width=True
+            )
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
         ref_anterior_alerta = ref_atual_alerta
-    
-    if st.button("✔️ Marcar todos como comprados"):
+
+    if st.button("✔️ Marcar todos como comprados", key="buy_all_alerta"):
         cursor.execute("""
             UPDATE estoque
             SET CompraRealizada = 1
@@ -113,6 +162,7 @@ if not alerta.empty:
         """)
         conn.commit()
         st.rerun()
+
 else:
     st.success("Estoque saudável 👍")
 st.divider()
