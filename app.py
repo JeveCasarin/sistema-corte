@@ -176,8 +176,8 @@ for _, row in df.iterrows():
     col3.write(row["Cor"])
 
     # IMAGEM (VERSÃO CORRETA E SEGURA)
-    extensoes = ["jpg", "jpeg", "png"]
-    
+    extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
+
     caminho_img = None
     
     for ext in extensoes:
