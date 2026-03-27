@@ -15,6 +15,19 @@ def conectar():
 conn = conectar()
 cursor = conn.cursor()
 
+# ================= CRIAR TABELA =================
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS estoque (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Referencia TEXT NOT NULL,
+    CodCor TEXT NOT NULL,
+    Cor TEXT NOT NULL,
+    Quantidade INTEGER NOT NULL DEFAULT 0,
+    CompraRealizada INTEGER NOT NULL DEFAULT 0
+)
+""")
+conn.commit()
+
 st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
 
 # ================= ALERTA =================
