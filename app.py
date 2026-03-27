@@ -15,6 +15,8 @@ def conectar():
 conn = conectar()
 cursor = conn.cursor()
 
+st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
+
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
 
