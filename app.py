@@ -12,12 +12,12 @@ if not os.path.exists(CAMINHO_IMAGENS):
 # ================= CSS RESPONSIVO =================
 st.markdown("""
 <style>
-/* evita zoom automático no iPhone/Safari */
+/* evita zoom no iPhone/Safari */
 input, textarea {
     font-size: 16px !important;
 }
 
-/* controle desktop / mobile */
+/* mostra/esconde por tela */
 .st-key-mobile_alerta,
 .st-key-mobile_lista {
     display: none;
@@ -28,7 +28,7 @@ input, textarea {
     display: block;
 }
 
-/* cards mobile */
+/* visual mobile */
 .npc-card {
     background: #111827;
     border: 1px solid #374151;
@@ -143,6 +143,25 @@ def badge_qtd_mobile(qtd, alerta=False):
     """
 
 st.markdown("<h1 style='text-align: center;'>Estoque NPC</h1>", unsafe_allow_html=True)
+def get_caminho_imagem(referencia):
+    extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
+    for ext in extensoes:
+        caminho_teste = os.path.join(CAMINHO_IMAGENS, f"{referencia}.{ext}")
+        if os.path.exists(caminho_teste):
+            return caminho_teste
+    return None
+
+def badge_qtd_mobile(qtd, alerta=False):
+    if alerta:
+        cor = "#dc2626" if qtd == 0 else "#f59e0b"
+    else:
+        cor = "#1f2937"
+
+    return f"""
+    <div class='npc-qtd' style='background-color:{cor};'>
+        {qtd}
+    </div>
+    """
 
 # ================= ALERTA =================
 st.markdown("<h2 style='color:red; text-align: center;'>⚠️ ALERTA DE COMPRA</h2>", unsafe_allow_html=True)
@@ -162,7 +181,6 @@ if "imagem_alerta_selecionada" not in st.session_state:
 if not alerta.empty:
     st.warning("⚠️ Fazer pedido desses itens AGORA")
 
-    # ================= DESKTOP ALERTA =================
     with st.container(key="desktop_alerta"):
         # Cabeçalhos
         col1, col2, col3, col4, col5, col6 = st.columns([2.8, 2, 3, 2, 1, 2.5])
@@ -189,7 +207,6 @@ if not alerta.empty:
             col2.write(row["CodCor"])
             col3.write(row["Cor"])
 
-            # IMAGEM
             extensoes = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"]
             caminho_img_alerta = None
 
@@ -209,7 +226,6 @@ if not alerta.empty:
             else:
                 col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
-            # QTD
             qtd_alerta = int(row["Quantidade"])
             cor_qtd_alerta = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
 
@@ -241,7 +257,6 @@ if not alerta.empty:
                 unsafe_allow_html=True
             )
 
-            # AÇÃO
             if col6.button("OC Realizada", key=f"buy_{row['id']}"):
                 cursor.execute("""
                     UPDATE estoque
@@ -251,7 +266,6 @@ if not alerta.empty:
                 conn.commit()
                 st.rerun()
 
-            # IMAGEM ABAIXO DA LINHA CLICADA
             if st.session_state.imagem_alerta_selecionada == row["id"] and caminho_img_alerta:
                 st.markdown(
                     "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
@@ -267,7 +281,6 @@ if not alerta.empty:
                 st.markdown("</div>", unsafe_allow_html=True)
 
             ref_anterior_alerta = ref_atual_alerta
-
     # ================= MOBILE ALERTA =================
     with st.container(key="mobile_alerta"):
         ref_anterior_alerta = ""
