@@ -96,37 +96,36 @@ if not alerta.empty:
             col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
         # QTD
-        qtd_alerta = int(row["Quantidade"])
-        cor_qtd = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
-
-        col5.markdown(
-            f"""
+       qtd_alerta = int(row["Quantidade"])
+       cor_qtd = "#dc2626" if qtd_alerta == 0 else "#f59e0b"
+        
+       col5.markdown(
+        f"""
+        <div style='
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            width:100%;
+        '>
             <div style='
+                font-size:18px;
+                font-weight:bold;
+                color:white;
+                background-color:{cor_qtd};
+                border-radius:6px;
+                width:40px;
+                height:30px;
                 display:flex;
-                justify-content:center;
                 align-items:center;
-                width:100%;
+                justify-content:center;
+                margin:auto;
             '>
-                <div style='
-                    font-size:18px;
-                    font-weight:bold;
-                    color:white;
-                    background-color:{cor_qtd if 'cor_qtd' in locals() else '#1f2937'};
-                    border-radius:6px;
-                    width:40px;
-                    height:30px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    margin:auto;
-                '>
-                    {qtd}
-                </div>
+                {qtd_alerta}
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
         # AÇÃO
         if col6.button("OC Realizada", key=f"buy_{row['id']}"):
             cursor.execute("""
@@ -244,6 +243,7 @@ for _, row in df.iterrows():
         col4.markdown("<div style='text-align:center;'>—</div>", unsafe_allow_html=True)
 
     qtd = get_quantidade(row)
+
     col5.markdown(
         f"""
         <div style='
@@ -255,8 +255,7 @@ for _, row in df.iterrows():
             <div style='
                 font-size:18px;
                 font-weight:bold;
-                color:white;
-                background-color:{cor_qtd if 'cor_qtd' in locals() else '#1f2937'};
+                background-color:#1f2937;
                 border-radius:6px;
                 width:40px;
                 height:30px;
