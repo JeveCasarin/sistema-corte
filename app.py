@@ -248,28 +248,15 @@ for _, row in df.iterrows():
             "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
             unsafe_allow_html=True
         )
-
+    
         st.image(
             caminho_img,
             caption=f"Referência: {row['Referencia']}",
             use_container_width=True
         )
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    ref_anterior = ref_atual
-    if st.session_state.imagem_selecionada == row["id"] and caminho_img:
-        st.markdown(
-            "<div style='background-color:#111827; padding:12px; border-radius:10px; margin:8px 0 14px 0;'>",
-            unsafe_allow_html=True
-        )
-        st.image(
-            caminho_img,
-            caption=f"Referência: {row['Referencia']}",
-            width=350
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
     
+        st.markdown("</div>", unsafe_allow_html=True)
+        
 # 🔥 Backup download
 import io
 df_backup = pd.read_sql("SELECT * FROM estoque", conn)
