@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
 import os
-import traceback
+import io
+
+# 🔥 ADICIONE AQUI
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -11,6 +12,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
+@st.cache_resource
 def conectar_planilha():
     creds = Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
@@ -18,39 +20,31 @@ def conectar_planilha():
     )
     gc = gspread.authorize(creds)
 
-    st.write("1. Autenticou")
-    st.write("2. Nome da planilha:", st.secrets["google_sheet"]["spreadsheet_name"])
-    st.write("3. Nome da aba:", st.secrets["google_sheet"]["worksheet_name"])
-
     planilha = gc.open_by_url(st.secrets["google_sheet"]["spreadsheet_url"])
-    st.write("4. Planilha abriu")
-    
-    st.write("Abas disponíveis:", [ws.title for ws in planilha.worksheets()])
-    
     aba = planilha.worksheet(st.secrets["google_sheet"]["worksheet_name"])
-    st.write("5. Aba abriu")
 
     return aba
 
-try:
+def carregar_dados():
     aba = conectar_planilha()
-    st.success("✅ Conectado ao Google Sheets")
-except Exception as e:
-    st.error(f"Tipo do erro: {type(e)}")
-    st.code(repr(e))
-    st.code(traceback.format_exc())
+    dados = aba.get_all_records()
+    df = pd.DataFrame(dados)
 
+    if df.empty:
+        df = pd.DataFrame(columns=[
+            "id", "Referencia", "CodCor", "Cor", "Quantidade", "CompraRealizada"
+        ])
+
+    return df
+
+# ================= IMAGENS =================
 CAMINHO_IMAGENS = "imagens"
 
 if not os.path.exists(CAMINHO_IMAGENS):
     os.makedirs(CAMINHO_IMAGENS)
 
 # ================= CONEXÃO =================
-def conectar():
-    return sqlite3.connect("estoque.db", check_same_thread=False)
-
-conn = conectar()
-cursor = conn.cursor()
+df_alerta = carregar_dados()
 
 # ================= CRIAR TABELA =================
 cursor.execute("""
