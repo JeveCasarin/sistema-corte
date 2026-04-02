@@ -19,6 +19,8 @@ def conectar_planilha():
     )
     gc = gspread.authorize(creds)
 
+    planilha = gc.open_by_url(st.secrets["google_sheet"]["spreadsheet_url"])
+
     st.write("Abas disponíveis:", [ws.title for ws in planilha.worksheets()])
     st.write("worksheet_name no secrets:", repr(st.secrets["google_sheet"]["worksheet_name"]))
     
