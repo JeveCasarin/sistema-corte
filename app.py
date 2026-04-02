@@ -22,9 +22,11 @@ def conectar_planilha():
     st.write("2. Nome da planilha:", st.secrets["google_sheet"]["spreadsheet_name"])
     st.write("3. Nome da aba:", st.secrets["google_sheet"]["worksheet_name"])
 
-    planilha = gc.open(st.secrets["google_sheet"]["spreadsheet_name"])
+    planilha = gc.open_by_url(st.secrets["google_sheet"]["spreadsheet_url"])
     st.write("4. Planilha abriu")
-
+    
+    st.write("Abas disponíveis:", [ws.title for ws in planilha.worksheets()])
+    
     aba = planilha.worksheet(st.secrets["google_sheet"]["worksheet_name"])
     st.write("5. Aba abriu")
 
