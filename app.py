@@ -20,10 +20,8 @@ def conectar_planilha():
     gc = gspread.authorize(creds)
 
     planilha = gc.open_by_url(st.secrets["google_sheet"]["spreadsheet_url"])
-
-    st.write("Abas existentes:", [ws.title for ws in planilha.worksheets()])
-    
     aba = planilha.worksheet(st.secrets["google_sheet"]["worksheet_name"])
+    
     return aba
 
 def carregar_dados():
