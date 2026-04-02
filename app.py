@@ -2,6 +2,29 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import os
+import gspread
+from google.oauth2.service_account import Credentials
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+def conectar_planilha():
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=SCOPES
+    )
+    gc = gspread.authorize(creds)
+    planilha = gc.open(st.secrets["google_sheet"]["spreadsheet_name"])
+    aba = planilha.worksheet(st.secrets["google_sheet"]["worksheet_name"])
+    return aba
+
+try:
+    aba = conectar_planilha()
+    st.success("✅ Conectado ao Google Sheets")
+except Exception as e:
+    st.error(f"❌ Erro: {e}")
 
 CAMINHO_IMAGENS = "imagens"
 
